@@ -1,0 +1,14 @@
+name: Chaos Mesh
+description: A cloud-native chaos engineering platform that orchestrates chaos experiments
+  on Kubernetes environments to test system resilience and reliability
+url: https://chaos-mesh.org/
+tags:
+- Chaos Engineering
+- Kubernetes
+- Testing
+- Resilience
+- Cloud Native
+created: '2025'
+modified: '2025'
+apis: []
+common: []
