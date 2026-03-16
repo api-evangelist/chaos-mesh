@@ -1,14 +1,44 @@
+aid: chaos-mesh
+url: >-
+  https://raw.githubusercontent.com/api-evangelist/chaos-mesh/refs/heads/main/apis.yml
 name: Chaos Mesh
-description: A cloud-native chaos engineering platform that orchestrates chaos experiments
-  on Kubernetes environments to test system resilience and reliability
-url: https://chaos-mesh.org/
 tags:
-- Chaos Engineering
-- Kubernetes
-- Testing
-- Resilience
-- Cloud Native
-created: '2025'
-modified: '2025'
-apis: []
-common: []
+  - Chaos Engineering
+  - Kubernetes
+  - Testing
+  - Resilience
+  - Cloud Native
+type: Index
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+access: 3rd-Party
+created: '2025-01-01'
+modified: '2026-03-16'
+position: Consumer
+description: >-
+  Chaos Mesh is a cloud-native chaos engineering platform that orchestrates
+  chaos experiments on Kubernetes environments to test system resilience and
+  reliability.
+apis:
+  - aid: chaos-mesh:chaos-mesh-api
+    name: Chaos Mesh API
+    tags:
+      - Chaos Engineering
+      - Kubernetes
+    humanURL: https://chaos-mesh.org/docs/
+    properties:
+      - url: https://chaos-mesh.org/docs/
+        type: Documentation
+    description: >-
+      Chaos Mesh provides APIs for orchestrating chaos experiments on
+      Kubernetes clusters.
+common:
+  - type: Website
+    url: https://chaos-mesh.org/
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GitHub Organization
+    url: https://github.com/chaos-mesh/chaos-mesh
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
+specificationVersion: '0.19'
