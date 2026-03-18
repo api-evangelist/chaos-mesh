@@ -1,0 +1,2167 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard API
+  description: >-
+    The Chaos Mesh Dashboard API provides REST endpoints for managing chaos
+    experiments, schedules, workflows, and events on Kubernetes clusters. Chaos
+    Mesh is a cloud-native chaos engineering platform that supports fault injection
+    into pods, nodes, networks, IO subsystems, and cloud provider resources. The
+    Dashboard API is served by the chaos-dashboard component and is the backend
+    for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/
+servers:
+  - url: http://localhost:2333/api
+    description: Default Chaos Mesh Dashboard server
+tags:
+  - name: Experiments
+    description: Create, manage, pause, and delete chaos experiments
+  - name: Schedules
+    description: Create and manage scheduled chaos experiments
+  - name: Workflows
+    description: Create and manage chaos engineering workflows with multiple steps
+  - name: Archives
+    description: Access archived (completed or deleted) experiments, schedules, and workflows
+  - name: Events
+    description: Query chaos experiment events and audit logs
+  - name: Common
+    description: Utility endpoints for cluster metadata, namespaces, and configuration
+  - name: Templates
+    description: Manage reusable status check templates for workflows
+paths:
+  /experiments:
+    get:
+      operationId: listExperiments
+      summary: List chaos experiments
+      description: >-
+        Returns a list of chaos experiments from the Kubernetes cluster. Results
+        can be filtered by namespace, name, kind of chaos, and status. Each
+        experiment entry includes its UID, name, namespace, kind, creation time,
+        and current status.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter experiments by name (partial match supported).
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: >-
+            Filter experiments by chaos kind (e.g., PodChaos, NetworkChaos,
+            IOChaos, StressChaos, TimeChaos, HTTPChaos).
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter experiments by status (e.g., running, paused, finished).
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of chaos experiments returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Experiment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createExperiment
+      summary: Create a new chaos experiment
+      description: >-
+        Creates a new chaos experiment in the Kubernetes cluster by submitting a
+        chaos custom resource definition. The request body should contain a
+        valid Chaos Mesh custom resource object such as PodChaos, NetworkChaos,
+        IOChaos, StressChaos, TimeChaos, HTTPChaos, or other supported chaos
+        kinds. The experiment begins injecting faults immediately upon creation.
+      tags:
+        - Experiments
+      requestBody:
+        description: Chaos experiment custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Experiment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KubeObjectDesc'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteExperiments
+      summary: Batch delete chaos experiments
+      description: >-
+        Deletes multiple chaos experiments in a single request. Experiment UIDs
+        to be deleted are specified as a comma-separated list in the uids query
+        parameter. Force deletion bypasses graceful cleanup of injected faults.
+      tags:
+        - Experiments
+      parameters:
+        - name: uids
+          in: query
+          description: Comma-separated list of experiment UIDs to delete.
+          required: true
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: Force delete experiments without waiting for fault cleanup.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Experiments deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/{uid}:
+    get:
+      operationId: getExperiment
+      summary: Get a chaos experiment
+      description: >-
+        Returns detailed information about a specific chaos experiment identified
+        by its UID. The response includes the full experiment spec, current status,
+        and associated Kubernetes resource details.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteExperiment
+      summary: Delete a chaos experiment
+      description: >-
+        Deletes a specific chaos experiment by its UID. The experiment and its
+        associated Kubernetes custom resource are removed. In-progress fault
+        injections are terminated during cleanup.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+        - name: force
+          in: query
+          description: Force delete without waiting for fault cleanup.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Experiment deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/pause/{uid}:
+    put:
+      operationId: pauseExperiment
+      summary: Pause a chaos experiment
+      description: >-
+        Pauses a running chaos experiment by its UID. When paused, fault
+        injection is suspended but the experiment resource is retained. The
+        experiment can be resumed with the start endpoint.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment paused successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/start/{uid}:
+    put:
+      operationId: startExperiment
+      summary: Start a chaos experiment
+      description: >-
+        Resumes a paused chaos experiment by its UID. Once started, fault
+        injection resumes according to the experiment spec. This endpoint is
+        used to unpause experiments that were previously paused.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/state:
+    get:
+      operationId: getExperimentsState
+      summary: Get the status of all experiments
+      description: >-
+        Returns a summary of experiment counts grouped by status across the
+        cluster. Useful for dashboard overview displays showing how many
+        experiments are running, paused, stopped, or finished.
+      tags:
+        - Experiments
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Experiment status summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules:
+    get:
+      operationId: listSchedules
+      summary: List chaos schedules
+      description: >-
+        Returns a list of chaos schedules from the Kubernetes cluster. Schedules
+        define recurring chaos experiments using cron expressions. Results can be
+        filtered by namespace, name, and kind.
+      tags:
+        - Schedules
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter schedules by name.
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: Filter schedules by chaos kind.
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter schedules by status.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of schedules returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createSchedule
+      summary: Create a new schedule
+      description: >-
+        Creates a new chaos schedule that runs a chaos experiment on a recurring
+        cron schedule. The request body is a Chaos Mesh Schedule custom resource
+        which wraps a chaos experiment spec with scheduling parameters including
+        the cron expression, history limit, and concurrency policy.
+      tags:
+        - Schedules
+      requestBody:
+        description: Schedule custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Schedule created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KubeObjectDesc'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteSchedules
+      summary: Batch delete schedules
+      description: >-
+        Deletes multiple chaos schedules in a single request using a
+        comma-separated list of UIDs.
+      tags:
+        - Schedules
+      parameters:
+        - name: uids
+          in: query
+          description: Comma-separated list of schedule UIDs to delete.
+          required: true
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: Force delete schedules without graceful cleanup.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Schedules deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/{uid}:
+    get:
+      operationId: getSchedule
+      summary: Get a schedule
+      description: >-
+        Returns detailed information about a specific chaos schedule identified
+        by its UID, including its cron expression, experiment template, and
+        execution history.
+      tags:
+        - Schedules
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteSchedule
+      summary: Delete a schedule
+      description: >-
+        Deletes a specific chaos schedule by its UID. The schedule and all its
+        associated Kubernetes resources are removed.
+      tags:
+        - Schedules
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+        - name: force
+          in: query
+          description: Force delete without graceful cleanup.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Schedule deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/pause/{uid}:
+    put:
+      operationId: pauseSchedule
+      summary: Pause a schedule
+      description: >-
+        Pauses a chaos schedule by its UID, preventing future scheduled runs
+        from executing. Currently running experiments triggered by the schedule
+        are not affected.
+      tags:
+        - Schedules
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule paused successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/start/{uid}:
+    put:
+      operationId: startSchedule
+      summary: Start a schedule
+      description: >-
+        Resumes a paused chaos schedule by its UID, allowing future cron-triggered
+        runs to execute again.
+      tags:
+        - Schedules
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workflows:
+    get:
+      operationId: listWorkflows
+      summary: List workflows
+      description: >-
+        Returns a list of chaos engineering workflows from the Kubernetes cluster.
+        Workflows allow orchestrating multiple chaos experiments as a sequence of
+        steps with parallel execution, conditional branching, and timing controls.
+        Results can be filtered by namespace, name, and status.
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter workflows by name.
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter workflows by status.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of workflows returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowMeta'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createWorkflow
+      summary: Create a new workflow
+      description: >-
+        Creates a new chaos engineering workflow in the Kubernetes cluster. The
+        request body is a Chaos Mesh Workflow custom resource that defines the
+        entry point and sequence of chaos steps to execute, including serial and
+        parallel task groups, suspends, and HTTP tasks.
+      tags:
+        - Workflows
+      requestBody:
+        description: Workflow custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Workflow created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workflows/{uid}:
+    get:
+      operationId: getWorkflow
+      summary: Get workflow details
+      description: >-
+        Returns detailed information about a specific chaos workflow identified by
+        its UID. The response includes the workflow topology, node states, and
+        execution progress of each step.
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Workflow details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: updateWorkflow
+      summary: Update a workflow
+      description: >-
+        Updates an existing chaos workflow with a new definition. The workflow
+        spec is replaced with the provided Kubernetes object description.
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      requestBody:
+        description: Updated workflow custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Workflow updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteWorkflow
+      summary: Delete a workflow
+      description: >-
+        Deletes a specific chaos workflow by its UID. The workflow and all its
+        associated Kubernetes resources are removed.
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Workflow deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workflows/parse-task/http:
+    post:
+      operationId: parseWorkflowHttpTask
+      summary: Parse an HTTP workflow task
+      description: >-
+        Parses a rendered HTTP workflow task template back to the original
+        request form. Used by the UI to convert between internal representations
+        and editable form data for HTTP tasks in workflows.
+      tags:
+        - Workflows
+      requestBody:
+        description: Rendered HTTP task template to parse.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+      responses:
+        '200':
+          description: Task parsed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HttpRequestForm'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workflows/render-task/http:
+    post:
+      operationId: renderWorkflowHttpTask
+      summary: Render an HTTP workflow task
+      description: >-
+        Renders an HTTP workflow task from a request form into the final template
+        format used in workflow definitions. This converts the UI form submission
+        into the internal Template representation.
+      tags:
+        - Workflows
+      requestBody:
+        description: HTTP task request form to render.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HttpRequestForm'
+      responses:
+        '200':
+          description: Task rendered successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Template'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /workflows/validate-task/http:
+    post:
+      operationId: validateWorkflowHttpTask
+      summary: Validate an HTTP workflow task
+      description: >-
+        Validates that a given rendered Template is a valid HTTP task. Returns
+        true if the template is valid, false or an error if it is not.
+      tags:
+        - Workflows
+      requestBody:
+        description: Rendered template to validate.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Template'
+      responses:
+        '200':
+          description: Validation result returned.
+          content:
+            application/json:
+              schema:
+                type: boolean
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives:
+    get:
+      operationId: listArchivedExperiments
+      summary: Get archived chaos experiments
+      description: >-
+        Returns a list of archived chaos experiments. Experiments are archived
+        after they complete their configured duration or are manually deleted.
+        Results can be filtered by namespace, name, kind, and time range.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter by experiment name.
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: Filter by chaos kind.
+          required: false
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: Filter events from this timestamp (RFC3339).
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          description: Filter events up to this timestamp (RFC3339).
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of archived experiments returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedExperiments
+      summary: Delete archived experiments
+      description: >-
+        Deletes archived experiment records from the Chaos Mesh database. This
+        removes historical records only, not live experiments.
+      tags:
+        - Archives
+      parameters:
+        - name: uids
+          in: query
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/{uid}:
+    get:
+      operationId: getArchivedExperiment
+      summary: Get an archived chaos experiment
+      description: >-
+        Returns detailed information about a specific archived chaos experiment
+        by its UID, including the original experiment spec and metadata.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived experiment details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedExperiment
+      summary: Delete a specific archived experiment
+      description: >-
+        Deletes a single archived experiment record by its UID.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/schedules:
+    get:
+      operationId: listArchivedSchedules
+      summary: Get archived schedule experiments
+      description: >-
+        Returns a list of archived chaos schedules that have been deleted or
+        completed. Useful for reviewing historical scheduled chaos activity.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter by schedule name.
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: Filter by chaos kind.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of archived schedules returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedSchedules
+      summary: Delete archived schedules
+      description: >-
+        Deletes multiple archived schedule records from the database.
+      tags:
+        - Archives
+      parameters:
+        - name: uids
+          in: query
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/schedules/{uid}:
+    get:
+      operationId: getArchivedSchedule
+      summary: Get an archived schedule
+      description: >-
+        Returns detailed information about a specific archived schedule by its UID.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived schedule details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedSchedule
+      summary: Delete an archived schedule
+      description: >-
+        Deletes a single archived schedule record by its UID.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/workflows:
+    get:
+      operationId: listArchivedWorkflows
+      summary: Get archived workflows
+      description: >-
+        Returns a list of archived chaos workflows that have been deleted or
+        completed.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter by workflow name.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of archived workflows returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedWorkflows
+      summary: Delete archived workflows
+      description: >-
+        Deletes multiple archived workflow records from the database.
+      tags:
+        - Archives
+      parameters:
+        - name: uids
+          in: query
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/workflows/{uid}:
+    get:
+      operationId: getArchivedWorkflow
+      summary: Get an archived workflow
+      description: >-
+        Returns detailed information about a specific archived workflow by its UID.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived workflow details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedWorkflow
+      summary: Delete an archived workflow
+      description: >-
+        Deletes a single archived workflow record by its UID.
+      tags:
+        - Archives
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /events:
+    get:
+      operationId: listEvents
+      summary: List chaos events
+      description: >-
+        Returns a list of chaos experiment events from the Chaos Mesh event store.
+        Events record state transitions and fault injection activities. Results
+        can be filtered by object UID, namespace, name, kind, and time range.
+      tags:
+        - Events
+      parameters:
+        - name: object_id
+          in: query
+          description: Filter events by the UID of the associated experiment or workflow.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter events by experiment name.
+          required: false
+          schema:
+            type: string
+        - name: kind
+          in: query
+          description: Filter events by chaos kind.
+          required: false
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: Filter events from this timestamp (RFC3339).
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          description: Filter events up to this timestamp (RFC3339).
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Maximum number of events to return.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 25
+      responses:
+        '200':
+          description: List of events returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /events/{id}:
+    get:
+      operationId: getEvent
+      summary: Get an event
+      description: >-
+        Returns a specific chaos event by its integer ID.
+      tags:
+        - Events
+      parameters:
+        - name: id
+          in: path
+          description: Integer ID of the event.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /events/workflow/{uid}:
+    get:
+      operationId: listWorkflowEvents
+      summary: List events for a workflow
+      description: >-
+        Returns all events associated with a specific workflow and its related
+        child experiments by the workflow UID.
+      tags:
+        - Events
+      parameters:
+        - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: List of workflow events returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/config:
+    get:
+      operationId: getDashboardConfig
+      summary: Get Dashboard configuration
+      description: >-
+        Returns the current configuration of the Chaos Mesh Dashboard including
+        security settings, namespace scope, and feature flags.
+      tags:
+        - Common
+      responses:
+        '200':
+          description: Dashboard configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardConfig'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/namespaces:
+    get:
+      operationId: listNamespaces
+      summary: Get all Kubernetes namespaces
+      description: >-
+        Returns a list of all namespace names from the Kubernetes cluster. Used
+        by the UI for namespace selection dropdowns when scoping experiments.
+      tags:
+        - Common
+      responses:
+        '200':
+          description: List of namespaces returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Kubernetes namespace name.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/chaos-available-namespaces:
+    get:
+      operationId: listChaosAvailableNamespaces
+      summary: Get namespaces available for chaos injection
+      description: >-
+        Returns the list of namespaces where chaos can be injected based on
+        Chaos Mesh RBAC configuration and namespace scope settings.
+      tags:
+        - Common
+      responses:
+        '200':
+          description: List of available namespaces returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Kubernetes namespace name.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/kinds:
+    get:
+      operationId: listChaosKinds
+      summary: Get all available chaos kinds
+      description: >-
+        Returns a list of all chaos experiment kinds available in the current
+        Kubernetes cluster based on installed CRDs. Examples include PodChaos,
+        NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, and cloud
+        provider chaos types.
+      tags:
+        - Common
+      responses:
+        '200':
+          description: List of chaos kinds returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Chaos kind name (Kubernetes CRD kind).
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/labels:
+    get:
+      operationId: getPodLabels
+      summary: Get pod labels
+      description: >-
+        Returns a map of label keys to their possible values for pods in the
+        specified namespace. Used by the UI to build label selector inputs for
+        targeting experiments at specific pods.
+      tags:
+        - Common
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Pod labels returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/annotations:
+    get:
+      operationId: getPodAnnotations
+      summary: Get pod annotations
+      description: >-
+        Returns a map of annotation keys to their possible values for pods in the
+        specified namespace.
+      tags:
+        - Common
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Pod annotations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/pods:
+    post:
+      operationId: listPods
+      summary: List pods matching a selector
+      description: >-
+        Returns pods from the Kubernetes cluster that match the provided label
+        selector. Used by the UI to preview which pods would be targeted by
+        an experiment before creating it.
+      tags:
+        - Common
+      requestBody:
+        description: Label selector to filter pods.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectorRequest'
+      responses:
+        '200':
+          description: Matching pods returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pod'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/physicalmachines:
+    post:
+      operationId: listPhysicalMachines
+      summary: List physical machines matching a selector
+      description: >-
+        Returns PhysicalMachine resources from the Kubernetes cluster that match
+        the provided selector. Physical machines are used for chaos experiments
+        targeting bare-metal or VM hosts via the chaos-daemon.
+      tags:
+        - Common
+      requestBody:
+        description: Selector to filter physical machines.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectorRequest'
+      responses:
+        '200':
+          description: Matching physical machines returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhysicalMachine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/rbac-config:
+    get:
+      operationId: getRbacConfig
+      summary: Get RBAC configuration
+      description: >-
+        Returns the RBAC configuration guidance for setting up Chaos Mesh
+        permissions. This endpoint helps users understand what RBAC roles and
+        bindings are needed to run chaos experiments in their chosen namespace
+        with their chosen scope.
+      tags:
+        - Common
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: role
+          in: query
+          description: Role type to generate RBAC config for (manager or viewer).
+          required: false
+          schema:
+            type: string
+            enum:
+              - manager
+              - viewer
+        - name: scope
+          in: query
+          description: Scope of the RBAC config (cluster or namespace).
+          required: false
+          schema:
+            type: string
+            enum:
+              - cluster
+              - namespace
+      responses:
+        '200':
+          description: RBAC configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /templates/statuschecks:
+    get:
+      operationId: listStatusCheckTemplates
+      summary: List status check templates
+      description: >-
+        Returns a list of status check templates available for use in workflows.
+        Status checks allow workflows to conditionally proceed based on external
+        HTTP endpoint health checks.
+      tags:
+        - Templates
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Filter templates by name.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of status check templates returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusCheckTemplateBase'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createStatusCheckTemplate
+      summary: Create a status check template
+      description: >-
+        Creates a new status check template that can be referenced in workflow
+        definitions. The template defines an HTTP endpoint to poll and the
+        criteria for determining success or failure.
+      tags:
+        - Templates
+      requestBody:
+        description: Status check template to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusCheckTemplate'
+      responses:
+        '200':
+          description: Template created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /templates/statuschecks/statuscheck:
+    get:
+      operationId: getStatusCheckTemplate
+      summary: Get a status check template
+      description: >-
+        Returns the detailed definition of a specific status check template
+        identified by namespace and name query parameters.
+      tags:
+        - Templates
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Name of the status check template.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status check template returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplateDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: updateStatusCheckTemplate
+      summary: Update a status check template
+      description: >-
+        Updates an existing status check template. The full template definition
+        must be provided in the request body.
+      tags:
+        - Templates
+      requestBody:
+        description: Updated status check template definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusCheckTemplate'
+      responses:
+        '200':
+          description: Template updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteStatusCheckTemplate
+      summary: Delete a status check template
+      description: >-
+        Deletes a status check template identified by namespace and name query
+        parameters.
+      tags:
+        - Templates
+      parameters:
+        - $ref: '#/components/parameters/namespaceParam'
+        - name: name
+          in: query
+          description: Name of the status check template to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Template deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  parameters:
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  schemas:
+    Experiment:
+      type: object
+      description: >-
+        Summary of a Chaos Mesh experiment stored in the Chaos Mesh database.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the experiment.
+        name:
+          type: string
+          description: Name of the experiment Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace containing the experiment.
+        kind:
+          type: string
+          description: >-
+            Chaos kind of the experiment (e.g., PodChaos, NetworkChaos,
+            IOChaos, StressChaos, TimeChaos, HTTPChaos).
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        status:
+          type: string
+          description: Current status of the experiment (e.g., running, paused, finished).
+    ExperimentDetail:
+      type: object
+      description: Detailed information about a chaos experiment including its Kubernetes resource.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the experiment.
+        name:
+          type: string
+          description: Name of the experiment.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the experiment.
+        kind:
+          type: string
+          description: Chaos kind of the experiment.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        status:
+          type: string
+          description: Current status of the experiment.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    ExperimentState:
+      type: object
+      description: Summary count of experiments grouped by status.
+      properties:
+        running:
+          type: integer
+          description: Number of currently running experiments.
+        paused:
+          type: integer
+          description: Number of paused experiments.
+        stopped:
+          type: integer
+          description: Number of stopped experiments.
+        finished:
+          type: integer
+          description: Number of finished experiments.
+        total:
+          type: integer
+          description: Total number of experiments.
+    Schedule:
+      type: object
+      description: Summary of a Chaos Mesh schedule.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the schedule.
+        name:
+          type: string
+          description: Name of the schedule resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        kind:
+          type: string
+          description: Chaos kind used by this schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
+        status:
+          type: string
+          description: Current status of the schedule.
+    ScheduleDetail:
+      type: object
+      description: Detailed information about a chaos schedule.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the schedule.
+        name:
+          type: string
+          description: Name of the schedule.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        kind:
+          type: string
+          description: Chaos kind used by this schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
+        status:
+          type: string
+          description: Current status of the schedule.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    Archive:
+      type: object
+      description: Summary record of an archived chaos experiment, schedule, or workflow.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived resource.
+        name:
+          type: string
+          description: Name of the archived resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace where the resource existed.
+        kind:
+          type: string
+          description: Chaos kind or resource type of the archived resource.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was originally created.
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was deleted and archived.
+    ArchiveDetail:
+      type: object
+      description: Detailed information about an archived chaos resource.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived resource.
+        name:
+          type: string
+          description: Name of the archived resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace where the resource existed.
+        kind:
+          type: string
+          description: Chaos kind or resource type.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was originally created.
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was archived.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    WorkflowMeta:
+      type: object
+      description: Summary metadata for a Chaos Mesh workflow.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the workflow.
+        name:
+          type: string
+          description: Name of the workflow Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the workflow.
+        entry:
+          type: string
+          description: Name of the entry template in the workflow.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow was created.
+        end_time:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow finished, if applicable.
+        status:
+          type: string
+          description: Current status of the workflow.
+    WorkflowDetail:
+      type: object
+      description: Detailed information about a chaos workflow including node topology.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the workflow.
+        name:
+          type: string
+          description: Name of the workflow.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the workflow.
+        entry:
+          type: string
+          description: Entry point template name for the workflow.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow was created.
+        end_time:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow finished.
+        status:
+          type: string
+          description: Current status of the workflow.
+        topology:
+          $ref: '#/components/schemas/Topology'
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    Topology:
+      type: object
+      description: Workflow execution topology showing nodes and their states.
+      properties:
+        nodes:
+          type: array
+          description: List of workflow nodes representing individual steps.
+          items:
+            $ref: '#/components/schemas/Node'
+    Node:
+      type: object
+      description: A node in the workflow topology representing a single execution step.
+      properties:
+        name:
+          type: string
+          description: Name of the workflow node.
+        uid:
+          type: string
+          description: UID of the workflow node.
+        type:
+          type: string
+          description: >-
+            Type of workflow node (e.g., ChaosNode, SerialNode, ParallelNode,
+            SuspendNode, TaskNode).
+        state:
+          type: string
+          description: >-
+            Execution state of the node (e.g., Running, Succeeded, Failed,
+            Pending).
+        template:
+          type: string
+          description: Template name this node is executing.
+        serial:
+          type: boolean
+          description: Whether this node is executing in serial order.
+    Event:
+      type: object
+      description: A chaos experiment event recording a state transition or fault injection activity.
+      properties:
+        id:
+          type: integer
+          description: Integer ID of the event.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the event was recorded.
+        kind:
+          type: string
+          description: Chaos kind associated with this event.
+        name:
+          type: string
+          description: Name of the experiment that generated this event.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the experiment.
+        object_id:
+          type: string
+          format: uuid
+          description: UID of the associated experiment, schedule, or workflow.
+        type:
+          type: string
+          description: >-
+            Event type indicating what happened (e.g., EXPERIMENT_START,
+            EXPERIMENT_END, FAULT_INJECTED, FAULT_RECOVERED).
+        message:
+          type: string
+          description: Human-readable message describing the event.
+    KubeObjectDesc:
+      type: object
+      description: >-
+        A Kubernetes object description used to represent chaos custom resources.
+        Contains the full spec of a Kubernetes resource including apiVersion, kind,
+        metadata, and spec.
+      properties:
+        apiVersion:
+          type: string
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
+    Template:
+      type: object
+      description: A workflow template defining a single step or group in a chaos workflow.
+      properties:
+        name:
+          type: string
+          description: Unique name of the template within the workflow.
+        templateType:
+          type: string
+          description: >-
+            Type of the template (e.g., Task, Serial, Parallel, Suspend,
+            Schedule).
+        deadline:
+          type: string
+          description: Maximum duration for this template step.
+        task:
+          type: object
+          description: Task-specific configuration for HTTP or chaos tasks.
+          additionalProperties: true
+        children:
+          type: array
+          description: Child template names for serial or parallel groups.
+          items:
+            type: string
+        conditionalBranches:
+          type: array
+          description: Conditional branches for workflow decision points.
+          items:
+            $ref: '#/components/schemas/ConditionalBranch'
+    ConditionalBranch:
+      type: object
+      description: A conditional branch in a workflow that executes based on an expression.
+      properties:
+        target:
+          type: string
+          description: Name of the template to execute if the condition is true.
+        expression:
+          type: string
+          description: Boolean expression that determines whether to take this branch.
+    HttpRequestForm:
+      type: object
+      description: Form representation of an HTTP workflow task for use in the UI.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Target URL for the HTTP request.
+        method:
+          type: string
+          enum: [GET, POST, PUT, DELETE, PATCH, HEAD]
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: string
+        body:
+          type: string
+          description: Request body content.
+        follow_redirects:
+          type: boolean
+          description: Whether to follow HTTP redirects.
+        timeout:
+          type: string
+          description: Request timeout duration.
+    Pod:
+      type: object
+      description: Summary of a Kubernetes pod available for chaos targeting.
+      properties:
+        name:
+          type: string
+          description: Pod name.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the pod.
+        ip:
+          type: string
+          description: Pod IP address.
+        state:
+          type: string
+          description: Pod state (e.g., Running, Pending, Succeeded, Failed).
+    PhysicalMachine:
+      type: object
+      description: A physical machine or VM registered as a Chaos Mesh target.
+      properties:
+        name:
+          type: string
+          description: Name of the PhysicalMachine resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        address:
+          type: string
+          description: Network address of the physical machine's chaos-daemon.
+    SelectorRequest:
+      type: object
+      description: Request body for selecting pods or physical machines by label selectors.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace to search.
+        label_selectors:
+          type: object
+          description: Key-value pairs for label selection.
+          additionalProperties:
+            type: string
+        annotation_selectors:
+          type: object
+          description: Key-value pairs for annotation selection.
+          additionalProperties:
+            type: string
+    StatusCheckTemplateBase:
+      type: object
+      description: Base summary of a status check template.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace of the template.
+        name:
+          type: string
+          description: Name of the status check template.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+    StatusCheckTemplate:
+      type: object
+      description: A status check template for use in workflow status check nodes.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckSpec:
+      type: object
+      description: Specification for a status check that polls an HTTP endpoint.
+      properties:
+        type:
+          type: string
+          description: Type of status check (currently HTTP).
+          enum: [HTTP]
+        intervalSeconds:
+          type: integer
+          minimum: 1
+          description: Polling interval in seconds.
+        timeoutSeconds:
+          type: integer
+          minimum: 1
+          description: Timeout for each HTTP request in seconds.
+        successThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive successes required to mark healthy.
+        failureThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive failures required to mark unhealthy.
+        http:
+          $ref: '#/components/schemas/HTTPStatusCheckSpec'
+    HTTPStatusCheckSpec:
+      type: object
+      description: HTTP-specific configuration for a status check.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to poll for the health check.
+        method:
+          type: string
+          enum: [GET, POST]
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        body:
+          type: string
+          description: Request body for POST requests.
+        criteria:
+          $ref: '#/components/schemas/HTTPCriteria'
+    HTTPCriteria:
+      type: object
+      description: Criteria for determining a successful status check response.
+      properties:
+        statusCode:
+          type: string
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
+    DashboardConfig:
+      type: object
+      description: Configuration settings for the Chaos Mesh Dashboard.
+      properties:
+        security_mode:
+          type: boolean
+          description: Whether security mode requiring authentication is enabled.
+        dns_server_create:
+          type: boolean
+          description: Whether Chaos Mesh should create a DNS server for DNS chaos.
+        version:
+          type: string
+          description: Version of Chaos Mesh currently running.
+        enable_filter_namespace:
+          type: boolean
+          description: Whether namespace filtering is enabled for the dashboard.
+    MapStringSliceResponse:
+      type: object
+      description: A map from string keys to arrays of string values.
+      additionalProperties:
+        type: array
+        items:
+          type: string
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.

@@ -1,0 +1,591 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chaos-mesh.org/schemas/chaos-mesh/experiment.json",
+  "title": "Chaos Mesh Experiment",
+  "description": "Schema for Chaos Mesh chaos experiment custom resources on Kubernetes. Covers all supported fault injection types including PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, and KernelChaos. Each chaos type specifies a selector for targeting pods and a type-specific spec for the fault to inject.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "const": "chaos-mesh.org/v1alpha1",
+      "description": "Chaos Mesh API group and version for all chaos custom resources."
+    },
+    "kind": {
+      "type": "string",
+      "description": "Chaos type kind identifying which fault injector to use.",
+      "enum": [
+        "PodChaos",
+        "NetworkChaos",
+        "IOChaos",
+        "StressChaos",
+        "HTTPChaos",
+        "TimeChaos",
+        "DNSChaos",
+        "KernelChaos",
+        "AWSChaos",
+        "GCPChaos",
+        "JVMChaos",
+        "PhysicalMachineChaos",
+        "Schedule",
+        "Workflow"
+      ]
+    },
+    "metadata": {
+      "$ref": "#/$defs/ObjectMeta"
+    },
+    "spec": {
+      "type": "object",
+      "description": "Chaos experiment specification. The required fields and their meanings vary by kind. All chaos types share selector, mode, and duration fields.",
+      "required": ["mode"],
+      "properties": {
+        "selector": {
+          "$ref": "#/$defs/PodSelector"
+        },
+        "mode": {
+          "type": "string",
+          "description": "Selection mode determining how many pods the chaos is applied to.",
+          "enum": ["one", "all", "fixed", "fixed-percent", "random-max-percent"],
+          "example": "one"
+        },
+        "value": {
+          "type": "string",
+          "description": "Numeric value for fixed, fixed-percent, or random-max-percent modes. For fixed mode, specifies exact count; for percentage modes, specifies a percentage 0-100.",
+          "example": "50"
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of the chaos experiment in Go duration format (e.g., 30s, 5m, 1h). If omitted, the experiment runs indefinitely until manually stopped.",
+          "pattern": "^[0-9]+(ns|us|ms|s|m|h)$",
+          "example": "10m"
+        },
+        "action": {
+          "type": "string",
+          "description": "Specific fault action to inject. Available actions depend on the chaos kind. PodChaos supports pod-failure, pod-kill, container-kill. NetworkChaos supports delay, loss, duplicate, corrupt, partition, bandwidth."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "ObjectMeta": {
+      "type": "object",
+      "description": "Standard Kubernetes object metadata.",
+      "required": ["name", "namespace"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the chaos resource within its namespace.",
+          "minLength": 1,
+          "maxLength": 253,
+          "example": "network-delay-test"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Kubernetes namespace where the chaos resource will be created.",
+          "example": "default"
+        },
+        "labels": {
+          "type": "object",
+          "description": "Key-value labels for organizing and selecting chaos resources.",
+          "additionalProperties": { "type": "string" }
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Non-identifying key-value annotations for the chaos resource.",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "PodSelector": {
+      "type": "object",
+      "description": "Selector configuration for targeting specific pods for chaos injection. Multiple selection criteria can be combined.",
+      "properties": {
+        "namespaces": {
+          "type": "array",
+          "description": "Kubernetes namespaces to select target pods from. If not specified, defaults to the namespace of the chaos resource.",
+          "items": {
+            "type": "string",
+            "description": "Namespace name."
+          },
+          "example": ["default", "production"]
+        },
+        "labelSelectors": {
+          "type": "object",
+          "description": "Key-value label selectors that target pods must match. All labels must be present on the pod.",
+          "additionalProperties": { "type": "string" },
+          "example": { "app": "frontend", "tier": "web" }
+        },
+        "expressionSelectors": {
+          "type": "array",
+          "description": "Advanced Kubernetes label selector expressions allowing In, NotIn, Exists, and DoesNotExist operators.",
+          "items": {
+            "$ref": "#/$defs/LabelSelectorRequirement"
+          }
+        },
+        "annotationSelectors": {
+          "type": "object",
+          "description": "Key-value annotation selectors that target pods must match.",
+          "additionalProperties": { "type": "string" }
+        },
+        "fieldSelectors": {
+          "type": "object",
+          "description": "Kubernetes field selectors for targeting pods by field values such as spec.nodeName.",
+          "additionalProperties": { "type": "string" }
+        },
+        "podPhaseSelectors": {
+          "type": "array",
+          "description": "Pod phases to restrict selection to, e.g., only Running pods.",
+          "items": {
+            "type": "string",
+            "enum": ["Pending", "Running", "Succeeded", "Failed", "Unknown"]
+          }
+        },
+        "nodeSelectors": {
+          "type": "object",
+          "description": "Node label selectors to restrict which nodes' pods can be targeted.",
+          "additionalProperties": { "type": "string" }
+        },
+        "nodes": {
+          "type": "array",
+          "description": "Explicit list of node names to restrict pod targeting to.",
+          "items": {
+            "type": "string",
+            "description": "Node name."
+          }
+        },
+        "pods": {
+          "type": "object",
+          "description": "Explicit pod name lists per namespace for direct pod targeting, bypassing label selectors.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Pod name."
+            }
+          }
+        }
+      }
+    },
+    "LabelSelectorRequirement": {
+      "type": "object",
+      "description": "A Kubernetes label selector requirement for advanced pod matching.",
+      "required": ["key", "operator"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "The label key the selector applies to."
+        },
+        "operator": {
+          "type": "string",
+          "description": "Comparison operator for the label key.",
+          "enum": ["In", "NotIn", "Exists", "DoesNotExist"]
+        },
+        "values": {
+          "type": "array",
+          "description": "Label values for In and NotIn operators. Must be empty for Exists and DoesNotExist.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PodChaosSpec": {
+      "type": "object",
+      "description": "Specification for PodChaos experiments that inject failures at the pod or container level.",
+      "required": ["selector", "mode", "action"],
+      "properties": {
+        "selector": { "$ref": "#/$defs/PodSelector" },
+        "mode": {
+          "type": "string",
+          "description": "Pod selection mode.",
+          "enum": ["one", "all", "fixed", "fixed-percent", "random-max-percent"]
+        },
+        "value": {
+          "type": "string",
+          "description": "Value for fixed or percentage-based selection modes."
+        },
+        "action": {
+          "type": "string",
+          "description": "PodChaos fault action to inject.",
+          "enum": ["pod-failure", "pod-kill", "container-kill"]
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of the fault injection.",
+          "example": "5m"
+        },
+        "containerNames": {
+          "type": "array",
+          "description": "Container names to target within the selected pods. Required for container-kill action.",
+          "items": {
+            "type": "string",
+            "description": "Container name."
+          }
+        },
+        "gracePeriod": {
+          "type": "integer",
+          "description": "Grace period in seconds for pod-kill action before the pod is forcefully terminated.",
+          "minimum": 0
+        }
+      }
+    },
+    "NetworkChaosSpec": {
+      "type": "object",
+      "description": "Specification for NetworkChaos experiments that inject network-level faults such as delays, packet loss, corruption, and partitions.",
+      "required": ["selector", "mode", "action"],
+      "properties": {
+        "selector": { "$ref": "#/$defs/PodSelector" },
+        "mode": {
+          "type": "string",
+          "description": "Pod selection mode.",
+          "enum": ["one", "all", "fixed", "fixed-percent", "random-max-percent"]
+        },
+        "action": {
+          "type": "string",
+          "description": "Network fault action to inject.",
+          "enum": ["delay", "loss", "duplicate", "corrupt", "partition", "bandwidth"]
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of the network fault injection.",
+          "example": "10m"
+        },
+        "direction": {
+          "type": "string",
+          "description": "Traffic direction to affect. to affects egress; from affects ingress; both affects all traffic.",
+          "enum": ["to", "from", "both"],
+          "default": "to"
+        },
+        "target": {
+          "$ref": "#/$defs/PodSelector",
+          "description": "Target pod selector for partition action, defining the other side of the partition."
+        },
+        "delay": {
+          "$ref": "#/$defs/NetworkDelay"
+        },
+        "loss": {
+          "$ref": "#/$defs/NetworkLoss"
+        },
+        "bandwidth": {
+          "$ref": "#/$defs/NetworkBandwidth"
+        }
+      }
+    },
+    "NetworkDelay": {
+      "type": "object",
+      "description": "Network latency parameters for NetworkChaos delay action.",
+      "required": ["latency"],
+      "properties": {
+        "latency": {
+          "type": "string",
+          "description": "Fixed latency to add to network packets, e.g., 100ms.",
+          "pattern": "^[0-9]+(ns|us|ms|s)$",
+          "example": "100ms"
+        },
+        "correlation": {
+          "type": "string",
+          "description": "Correlation percentage between consecutive packets (0-100). Higher values make delays more consistent.",
+          "example": "25"
+        },
+        "jitter": {
+          "type": "string",
+          "description": "Jitter (variance) around the latency value, e.g., 10ms.",
+          "pattern": "^[0-9]+(ns|us|ms|s)$",
+          "example": "10ms"
+        },
+        "reorder": {
+          "type": "object",
+          "description": "Packet reorder configuration.",
+          "properties": {
+            "reorder": {
+              "type": "string",
+              "description": "Percentage of packets to reorder."
+            },
+            "correlation": {
+              "type": "string",
+              "description": "Correlation for packet reordering."
+            },
+            "gap": {
+              "type": "integer",
+              "description": "Gap between reordered packets.",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "NetworkLoss": {
+      "type": "object",
+      "description": "Network packet loss parameters for NetworkChaos loss action.",
+      "required": ["loss"],
+      "properties": {
+        "loss": {
+          "type": "string",
+          "description": "Percentage of packets to drop, expressed as a string (0-100).",
+          "example": "25"
+        },
+        "correlation": {
+          "type": "string",
+          "description": "Correlation percentage between consecutive packet loss decisions.",
+          "example": "25"
+        }
+      }
+    },
+    "NetworkBandwidth": {
+      "type": "object",
+      "description": "Network bandwidth throttle parameters for NetworkChaos bandwidth action.",
+      "required": ["rate", "limit", "buffer"],
+      "properties": {
+        "rate": {
+          "type": "string",
+          "description": "Bandwidth throttle rate in bits per second, e.g., 1mbps.",
+          "example": "1mbps"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Number of bytes that can be queued waiting for tokens to become available.",
+          "minimum": 1
+        },
+        "buffer": {
+          "type": "integer",
+          "description": "Maximum number of bytes that tokens can be available for instantaneously.",
+          "minimum": 1
+        }
+      }
+    },
+    "StressChaosSpec": {
+      "type": "object",
+      "description": "Specification for StressChaos experiments that inject CPU or memory stress into selected pods.",
+      "required": ["selector", "mode", "stressors"],
+      "properties": {
+        "selector": { "$ref": "#/$defs/PodSelector" },
+        "mode": {
+          "type": "string",
+          "description": "Pod selection mode.",
+          "enum": ["one", "all", "fixed", "fixed-percent", "random-max-percent"]
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of stress injection.",
+          "example": "30s"
+        },
+        "stressors": {
+          "$ref": "#/$defs/Stressors"
+        },
+        "stressngStressors": {
+          "type": "string",
+          "description": "Raw stress-ng arguments for advanced stress configuration."
+        },
+        "containerNames": {
+          "type": "array",
+          "description": "Container names to inject stress into. Defaults to all containers.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "Stressors": {
+      "type": "object",
+      "description": "CPU and memory stressor configuration for StressChaos.",
+      "properties": {
+        "cpu": {
+          "type": "object",
+          "description": "CPU stress configuration.",
+          "properties": {
+            "workers": {
+              "type": "integer",
+              "description": "Number of CPU stress worker threads to spawn.",
+              "minimum": 1,
+              "example": 1
+            },
+            "load": {
+              "type": "integer",
+              "description": "CPU utilization target as a percentage (0-100).",
+              "minimum": 0,
+              "maximum": 100,
+              "example": 50
+            }
+          }
+        },
+        "memory": {
+          "type": "object",
+          "description": "Memory stress configuration.",
+          "properties": {
+            "workers": {
+              "type": "integer",
+              "description": "Number of memory stress worker threads to spawn.",
+              "minimum": 1,
+              "example": 1
+            },
+            "size": {
+              "type": "string",
+              "description": "Total memory to consume per worker, e.g., 256MB or 50%.",
+              "example": "256MB"
+            }
+          }
+        }
+      }
+    },
+    "HTTPChaosSpec": {
+      "type": "object",
+      "description": "Specification for HTTPChaos experiments that inject faults into HTTP requests or responses.",
+      "required": ["selector", "mode", "target"],
+      "properties": {
+        "selector": { "$ref": "#/$defs/PodSelector" },
+        "mode": {
+          "type": "string",
+          "description": "Pod selection mode.",
+          "enum": ["one", "all", "fixed", "fixed-percent", "random-max-percent"]
+        },
+        "duration": {
+          "type": "string",
+          "description": "Duration of the HTTP chaos injection.",
+          "example": "5m"
+        },
+        "target": {
+          "type": "string",
+          "description": "Whether to inject faults into HTTP Requests or Responses.",
+          "enum": ["Request", "Response"]
+        },
+        "port": {
+          "type": "integer",
+          "description": "Target service port to intercept HTTP traffic on.",
+          "minimum": 1,
+          "maximum": 65535,
+          "example": 8080
+        },
+        "method": {
+          "type": "string",
+          "description": "HTTP method filter to limit injection to specific methods.",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path prefix or regex filter to limit injection to specific endpoints.",
+          "example": "/api/*"
+        },
+        "abort": {
+          "type": "boolean",
+          "description": "When true, aborts the matching HTTP request or response."
+        },
+        "delay": {
+          "type": "string",
+          "description": "Latency to inject into matching HTTP interactions.",
+          "pattern": "^[0-9]+(ns|us|ms|s)$",
+          "example": "500ms"
+        },
+        "replace": {
+          "type": "object",
+          "description": "Replacement configuration for modifying HTTP request or response content.",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "description": "Headers to replace in the request or response.",
+              "additionalProperties": { "type": "string" }
+            },
+            "body": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "description": "Base64-encoded body to replace the original body with."
+            },
+            "code": {
+              "type": "integer",
+              "description": "HTTP status code to replace in the response.",
+              "minimum": 100,
+              "maximum": 599
+            }
+          }
+        },
+        "patch": {
+          "type": "object",
+          "description": "Patch configuration for modifying HTTP request or response content.",
+          "properties": {
+            "headers": {
+              "type": "array",
+              "description": "Headers to append to the request or response.",
+              "items": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            },
+            "body": {
+              "type": "object",
+              "description": "Body patch configuration.",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Body content type (json or form).",
+                  "enum": ["json", "form"]
+                },
+                "value": {
+                  "type": "string",
+                  "description": "JSON or form-encoded value to merge into the body."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Schedule": {
+      "type": "object",
+      "description": "A Chaos Mesh Schedule resource that triggers chaos experiments automatically on a cron schedule.",
+      "required": ["apiVersion", "kind", "metadata", "spec"],
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "const": "chaos-mesh.org/v1alpha1",
+          "description": "Chaos Mesh API version."
+        },
+        "kind": {
+          "type": "string",
+          "const": "Schedule",
+          "description": "Resource kind."
+        },
+        "metadata": {
+          "$ref": "#/$defs/ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/$defs/ScheduleSpec"
+        }
+      }
+    },
+    "ScheduleSpec": {
+      "type": "object",
+      "description": "Specification for a Chaos Mesh Schedule resource.",
+      "required": ["schedule", "type"],
+      "properties": {
+        "schedule": {
+          "type": "string",
+          "description": "Cron expression defining when to trigger the experiment. Supports standard cron and extended formats like @every 10m.",
+          "example": "@every 1h"
+        },
+        "concurrencyPolicy": {
+          "type": "string",
+          "description": "Policy for handling concurrent experiment instances.",
+          "enum": ["Forbid", "Allow"],
+          "default": "Forbid"
+        },
+        "historyLimit": {
+          "type": "integer",
+          "description": "Maximum number of completed experiment instances to retain in history.",
+          "minimum": 0,
+          "default": 1
+        },
+        "startingDeadlineSeconds": {
+          "type": "integer",
+          "description": "Deadline in seconds for starting a scheduled experiment if the scheduled time was missed.",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "description": "Chaos type kind for the embedded chaos experiment.",
+          "example": "PodChaos"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

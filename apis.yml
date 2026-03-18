@@ -12,7 +12,7 @@ type: Index
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 access: 3rd-Party
 created: '2025-01-01'
-modified: '2026-03-16'
+modified: '2026-03-18'
 position: Consumer
 description: >-
   Chaos Mesh is a cloud-native chaos engineering platform that orchestrates
@@ -24,20 +24,50 @@ apis:
     tags:
       - Chaos Engineering
       - Kubernetes
+      - Fault Injection
     humanURL: https://chaos-mesh.org/docs/
     properties:
       - url: https://chaos-mesh.org/docs/
         type: Documentation
+      - type: Getting Started
+        url: https://chaos-mesh.org/docs/quick-start/
+      - type: GitHubRepository
+        url: https://github.com/chaos-mesh/chaos-mesh
+      - type: OpenAPI
+        url: openapi/chaos-mesh-dashboard-api-openapi.yml
+      - type: JSONSchema
+        url: json-schema/chaos-mesh-experiment-schema.json
     description: >-
-      Chaos Mesh provides APIs for orchestrating chaos experiments on
-      Kubernetes clusters.
+      Chaos Mesh provides Kubernetes custom resources and a REST API for
+      orchestrating chaos experiments including network faults, pod failures,
+      IO chaos, stress testing, and HTTP request injection. The Chaos Dashboard
+      provides a web UI backed by a REST API for creating, managing, and
+      monitoring chaos experiments and workflows.
 common:
   - type: Website
     url: https://chaos-mesh.org/
   - type: Documentation
     url: https://chaos-mesh.org/docs/
+  - type: Getting Started
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: Blog
+    url: https://chaos-mesh.org/blog/
+  - type: Change Log
+    url: https://github.com/chaos-mesh/chaos-mesh/blob/master/CHANGELOG.md
   - type: GitHub Organization
+    url: https://github.com/chaos-mesh
+  - type: GitHubRepository
     url: https://github.com/chaos-mesh/chaos-mesh
+  - type: Community
+    url: https://chaos-mesh.org/community/
+  - type: JSON-LD
+    url: json-ld/chaos-mesh-context.jsonld
+    name: Chaos Mesh JSON-LD Context
+    description: Linked data context mapping Chaos Mesh resources to standard vocabularies.
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+    name: Chaos Mesh Experiment JSON Schema
+    description: JSON Schema for Chaos Mesh experiment custom resources covering all supported chaos kinds.
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com

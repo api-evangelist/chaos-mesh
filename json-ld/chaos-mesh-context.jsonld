@@ -1,0 +1,241 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "chaos": "https://chaos-mesh.org/vocab#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "k8s": "https://kubernetes.io/docs/concepts/",
+    "cncf": "https://www.cncf.io/projects/",
+
+    "ChaosExperiment": {
+      "@id": "chaos:ChaosExperiment",
+      "@context": {
+        "apiVersion": "chaos:apiVersion",
+        "kind": "chaos:chaosKind",
+        "metadata": "chaos:metadata",
+        "spec": "chaos:spec",
+        "status": "chaos:status"
+      },
+      "rdfs:label": "Chaos Experiment",
+      "rdfs:comment": "A Chaos Mesh fault injection experiment targeting Kubernetes pods.",
+      "rdfs:subClassOf": { "@id": "k8s:workloads/" }
+    },
+
+    "PodChaos": {
+      "@id": "chaos:PodChaos",
+      "@context": {
+        "action": "chaos:podAction",
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "duration": "chaos:duration",
+        "containerNames": {
+          "@id": "chaos:containerNames",
+          "@container": "@set"
+        },
+        "gracePeriod": {
+          "@id": "chaos:gracePeriod",
+          "@type": "xsd:integer"
+        }
+      },
+      "rdfs:label": "Pod Chaos",
+      "rdfs:comment": "A chaos experiment injecting pod-level faults such as pod-failure, pod-kill, or container-kill.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "NetworkChaos": {
+      "@id": "chaos:NetworkChaos",
+      "@context": {
+        "action": "chaos:networkAction",
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "direction": "chaos:networkDirection",
+        "duration": "chaos:duration",
+        "delay": "chaos:networkDelay",
+        "loss": "chaos:networkLoss",
+        "bandwidth": "chaos:networkBandwidth",
+        "target": "chaos:targetSelector"
+      },
+      "rdfs:label": "Network Chaos",
+      "rdfs:comment": "A chaos experiment injecting network faults such as latency, packet loss, corruption, or partition.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "IOChaos": {
+      "@id": "chaos:IOChaos",
+      "@context": {
+        "action": "chaos:ioAction",
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "volumePath": "chaos:volumePath",
+        "path": "chaos:ioPath",
+        "methods": {
+          "@id": "chaos:ioMethods",
+          "@container": "@set"
+        },
+        "delay": "chaos:ioDelay",
+        "errno": {
+          "@id": "chaos:ioErrno",
+          "@type": "xsd:integer"
+        },
+        "percent": {
+          "@id": "chaos:ioPercent",
+          "@type": "xsd:integer"
+        }
+      },
+      "rdfs:label": "IO Chaos",
+      "rdfs:comment": "A chaos experiment injecting I/O faults such as delays, errors, and faults on file system operations.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "StressChaos": {
+      "@id": "chaos:StressChaos",
+      "@context": {
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "duration": "chaos:duration",
+        "stressors": "chaos:stressors",
+        "containerNames": {
+          "@id": "chaos:containerNames",
+          "@container": "@set"
+        }
+      },
+      "rdfs:label": "Stress Chaos",
+      "rdfs:comment": "A chaos experiment injecting CPU or memory stress into selected pods.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "HTTPChaos": {
+      "@id": "chaos:HTTPChaos",
+      "@context": {
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "target": "chaos:httpTarget",
+        "port": {
+          "@id": "schema:portNumber",
+          "@type": "xsd:integer"
+        },
+        "method": "chaos:httpMethod",
+        "path": "chaos:httpPath",
+        "duration": "chaos:duration",
+        "abort": {
+          "@id": "chaos:httpAbort",
+          "@type": "xsd:boolean"
+        },
+        "delay": "chaos:httpDelay",
+        "replace": "chaos:httpReplace",
+        "patch": "chaos:httpPatch"
+      },
+      "rdfs:label": "HTTP Chaos",
+      "rdfs:comment": "A chaos experiment injecting faults into HTTP request or response traffic.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "TimeChaos": {
+      "@id": "chaos:TimeChaos",
+      "@context": {
+        "selector": "chaos:podSelector",
+        "mode": "chaos:selectionMode",
+        "duration": "chaos:duration",
+        "timeOffset": "chaos:timeOffset",
+        "clockIds": {
+          "@id": "chaos:clockIds",
+          "@container": "@set"
+        },
+        "containerNames": {
+          "@id": "chaos:containerNames",
+          "@container": "@set"
+        }
+      },
+      "rdfs:label": "Time Chaos",
+      "rdfs:comment": "A chaos experiment that manipulates the system clock in selected pods to simulate time skew.",
+      "rdfs:subClassOf": { "@id": "chaos:ChaosExperiment" }
+    },
+
+    "Schedule": {
+      "@id": "chaos:Schedule",
+      "@context": {
+        "schedule": "chaos:cronExpression",
+        "concurrencyPolicy": "chaos:concurrencyPolicy",
+        "historyLimit": {
+          "@id": "chaos:historyLimit",
+          "@type": "xsd:integer"
+        },
+        "startingDeadlineSeconds": {
+          "@id": "chaos:startingDeadlineSeconds",
+          "@type": "xsd:integer"
+        }
+      },
+      "rdfs:label": "Chaos Schedule",
+      "rdfs:comment": "A recurring chaos experiment schedule using cron expressions to trigger fault injection automatically.",
+      "rdfs:subClassOf": { "@id": "schema:Action" }
+    },
+
+    "Workflow": {
+      "@id": "chaos:Workflow",
+      "@context": {
+        "entry": "chaos:workflowEntry",
+        "templates": {
+          "@id": "chaos:workflowTemplates",
+          "@container": "@set"
+        }
+      },
+      "rdfs:label": "Chaos Workflow",
+      "rdfs:comment": "A Chaos Mesh workflow orchestrating multiple chaos experiments in serial or parallel sequences.",
+      "rdfs:subClassOf": { "@id": "schema:Action" }
+    },
+
+    "PodSelector": {
+      "@id": "chaos:PodSelector",
+      "@context": {
+        "namespaces": {
+          "@id": "chaos:targetNamespaces",
+          "@container": "@set"
+        },
+        "labelSelectors": "chaos:labelSelectors",
+        "annotationSelectors": "chaos:annotationSelectors",
+        "fieldSelectors": "chaos:fieldSelectors",
+        "podPhaseSelectors": {
+          "@id": "chaos:podPhaseSelectors",
+          "@container": "@set"
+        },
+        "nodeSelectors": "chaos:nodeSelectors",
+        "pods": "chaos:explicitPods"
+      },
+      "rdfs:label": "Pod Selector",
+      "rdfs:comment": "Configuration for selecting target pods for chaos injection via labels, namespaces, or explicit names."
+    },
+
+    "Event": {
+      "@id": "chaos:Event",
+      "@context": {
+        "namespace": "chaos:eventNamespace",
+        "name": "dcterms:title",
+        "kind": "chaos:resourceKind",
+        "type": "chaos:eventType",
+        "reason": "chaos:eventReason",
+        "message": "schema:description",
+        "created_at": {
+          "@id": "dcterms:created",
+          "@type": "xsd:dateTime"
+        },
+        "object_id": "chaos:objectId"
+      },
+      "rdfs:label": "Chaos Event",
+      "rdfs:comment": "An event record capturing lifecycle changes and state transitions of chaos experiments.",
+      "rdfs:subClassOf": { "@id": "schema:Event" }
+    },
+
+    "name": "dcterms:title",
+    "description": "dcterms:description",
+    "uid": "dcterms:identifier",
+    "created_at": {
+      "@id": "dcterms:created",
+      "@type": "xsd:dateTime"
+    },
+    "namespace": "chaos:namespace",
+    "duration": "chaos:duration",
+    "status": "chaos:status"
+  }
+}
