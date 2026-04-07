@@ -33,27 +33,6 @@ servers:
         default: '2333'
         description: Port on which the Chaos Mesh Dashboard API listens.
 tags:
-  - name: Experiments
-    description: >-
-      Chaos experiment lifecycle management including creating, listing,
-      getting, pausing, restarting, and deleting experiments of all supported
-      chaos types (PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos,
-      TimeChaos, DNSChaos, KernelChaos, AWSChaos, GCPChaos, JVMChaos).
-  - name: Workflows
-    description: >-
-      Workflow management for orchestrating multiple chaos experiments in
-      serial or parallel sequences. Workflows allow creating complex
-      multi-step chaos scenarios with dependencies and timing controls.
-  - name: Schedules
-    description: >-
-      Schedule management for recurring chaos experiments using cron
-      expressions. Scheduled experiments run automatically at configured
-      intervals without manual intervention.
-  - name: Events
-    description: >-
-      Event history for chaos experiments, workflows, and schedules.
-      Events record state transitions, errors, and lifecycle changes for
-      auditing and debugging purposes.
   - name: Archives
     description: >-
       Archived completed and deleted experiments, workflows, and schedules.
@@ -63,6 +42,27 @@ tags:
     description: >-
       Utility endpoints for namespace listing, pod discovery, and label
       selector support used when creating chaos experiment targets.
+  - name: Events
+    description: >-
+      Event history for chaos experiments, workflows, and schedules.
+      Events record state transitions, errors, and lifecycle changes for
+      auditing and debugging purposes.
+  - name: Experiments
+    description: >-
+      Chaos experiment lifecycle management including creating, listing,
+      getting, pausing, restarting, and deleting experiments of all supported
+      chaos types (PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos,
+      TimeChaos, DNSChaos, KernelChaos, AWSChaos, GCPChaos, JVMChaos).
+  - name: Schedules
+    description: >-
+      Schedule management for recurring chaos experiments using cron
+      expressions. Scheduled experiments run automatically at configured
+      intervals without manual intervention.
+  - name: Workflows
+    description: >-
+      Workflow management for orchestrating multiple chaos experiments in
+      serial or parallel sequences. Workflows allow creating complex
+      multi-step chaos scenarios with dependencies and timing controls.
 security:
   - bearerAuth: []
 paths:

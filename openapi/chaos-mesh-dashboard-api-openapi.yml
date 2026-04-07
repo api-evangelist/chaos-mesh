@@ -22,20 +22,20 @@ servers:
   - url: http://localhost:2333/api
     description: Default Chaos Mesh Dashboard server
 tags:
+  - name: Archives
+    description: Access archived (completed or deleted) experiments, schedules, and workflows
+  - name: Common
+    description: Utility endpoints for cluster metadata, namespaces, and configuration
+  - name: Events
+    description: Query chaos experiment events and audit logs
   - name: Experiments
     description: Create, manage, pause, and delete chaos experiments
   - name: Schedules
     description: Create and manage scheduled chaos experiments
-  - name: Workflows
-    description: Create and manage chaos engineering workflows with multiple steps
-  - name: Archives
-    description: Access archived (completed or deleted) experiments, schedules, and workflows
-  - name: Events
-    description: Query chaos experiment events and audit logs
-  - name: Common
-    description: Utility endpoints for cluster metadata, namespaces, and configuration
   - name: Templates
     description: Manage reusable status check templates for workflows
+  - name: Workflows
+    description: Create and manage chaos engineering workflows with multiple steps
 paths:
   /experiments:
     get:

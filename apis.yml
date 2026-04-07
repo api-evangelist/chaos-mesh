@@ -4,10 +4,10 @@ url: >-
 name: Chaos Mesh
 tags:
   - Chaos Engineering
-  - Kubernetes
-  - Testing
-  - Resilience
   - Cloud Native
+  - Kubernetes
+  - Resilience
+  - Testing
 type: Index
 image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
 access: 3rd-Party
@@ -23,8 +23,8 @@ apis:
     name: Chaos Mesh API
     tags:
       - Chaos Engineering
-      - Kubernetes
       - Fault Injection
+      - Kubernetes
     humanURL: https://chaos-mesh.org/docs/
     properties:
       - url: https://chaos-mesh.org/docs/
