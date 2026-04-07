@@ -40,7 +40,7 @@ paths:
   /experiments:
     get:
       operationId: listExperiments
-      summary: List chaos experiments
+      summary: Chaos Mesh List chaos experiments
       description: >-
         Returns a list of chaos experiments from the Kubernetes cluster. Results
         can be filtered by namespace, name, kind of chaos, and status. Each
@@ -85,7 +85,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createExperiment
-      summary: Create a new chaos experiment
+      summary: Chaos Mesh Create a new chaos experiment
       description: >-
         Creates a new chaos experiment in the Kubernetes cluster by submitting a
         chaos custom resource definition. The request body should contain a
@@ -114,7 +114,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: batchDeleteExperiments
-      summary: Batch delete chaos experiments
+      summary: Chaos Mesh Batch delete chaos experiments
       description: >-
         Deletes multiple chaos experiments in a single request. Experiment UIDs
         to be deleted are specified as a comma-separated list in the uids query
@@ -149,7 +149,7 @@ paths:
   /experiments/{uid}:
     get:
       operationId: getExperiment
-      summary: Get a chaos experiment
+      summary: Chaos Mesh Get a chaos experiment
       description: >-
         Returns detailed information about a specific chaos experiment identified
         by its UID. The response includes the full experiment spec, current status,
@@ -173,7 +173,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteExperiment
-      summary: Delete a chaos experiment
+      summary: Chaos Mesh Delete a chaos experiment
       description: >-
         Deletes a specific chaos experiment by its UID. The experiment and its
         associated Kubernetes custom resource are removed. In-progress fault
@@ -205,7 +205,7 @@ paths:
   /experiments/pause/{uid}:
     put:
       operationId: pauseExperiment
-      summary: Pause a chaos experiment
+      summary: Chaos Mesh Pause a chaos experiment
       description: >-
         Pauses a running chaos experiment by its UID. When paused, fault
         injection is suspended but the experiment resource is retained. The
@@ -230,7 +230,7 @@ paths:
   /experiments/start/{uid}:
     put:
       operationId: startExperiment
-      summary: Start a chaos experiment
+      summary: Chaos Mesh Start a chaos experiment
       description: >-
         Resumes a paused chaos experiment by its UID. Once started, fault
         injection resumes according to the experiment spec. This endpoint is
@@ -255,7 +255,7 @@ paths:
   /experiments/state:
     get:
       operationId: getExperimentsState
-      summary: Get the status of all experiments
+      summary: Chaos Mesh Get the status of all experiments
       description: >-
         Returns a summary of experiment counts grouped by status across the
         cluster. Useful for dashboard overview displays showing how many
@@ -278,7 +278,7 @@ paths:
   /schedules:
     get:
       operationId: listSchedules
-      summary: List chaos schedules
+      summary: Chaos Mesh List chaos schedules
       description: >-
         Returns a list of chaos schedules from the Kubernetes cluster. Schedules
         define recurring chaos experiments using cron expressions. Results can be
@@ -320,7 +320,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createSchedule
-      summary: Create a new schedule
+      summary: Chaos Mesh Create a new schedule
       description: >-
         Creates a new chaos schedule that runs a chaos experiment on a recurring
         cron schedule. The request body is a Chaos Mesh Schedule custom resource
@@ -348,7 +348,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: batchDeleteSchedules
-      summary: Batch delete schedules
+      summary: Chaos Mesh Batch delete schedules
       description: >-
         Deletes multiple chaos schedules in a single request using a
         comma-separated list of UIDs.
@@ -382,7 +382,7 @@ paths:
   /schedules/{uid}:
     get:
       operationId: getSchedule
-      summary: Get a schedule
+      summary: Chaos Mesh Get a schedule
       description: >-
         Returns detailed information about a specific chaos schedule identified
         by its UID, including its cron expression, experiment template, and
@@ -406,7 +406,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteSchedule
-      summary: Delete a schedule
+      summary: Chaos Mesh Delete a schedule
       description: >-
         Deletes a specific chaos schedule by its UID. The schedule and all its
         associated Kubernetes resources are removed.
@@ -437,7 +437,7 @@ paths:
   /schedules/pause/{uid}:
     put:
       operationId: pauseSchedule
-      summary: Pause a schedule
+      summary: Chaos Mesh Pause a schedule
       description: >-
         Pauses a chaos schedule by its UID, preventing future scheduled runs
         from executing. Currently running experiments triggered by the schedule
@@ -462,7 +462,7 @@ paths:
   /schedules/start/{uid}:
     put:
       operationId: startSchedule
-      summary: Start a schedule
+      summary: Chaos Mesh Start a schedule
       description: >-
         Resumes a paused chaos schedule by its UID, allowing future cron-triggered
         runs to execute again.
@@ -486,7 +486,7 @@ paths:
   /workflows:
     get:
       operationId: listWorkflows
-      summary: List workflows
+      summary: Chaos Mesh List workflows
       description: >-
         Returns a list of chaos engineering workflows from the Kubernetes cluster.
         Workflows allow orchestrating multiple chaos experiments as a sequence of
@@ -523,7 +523,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createWorkflow
-      summary: Create a new workflow
+      summary: Chaos Mesh Create a new workflow
       description: >-
         Creates a new chaos engineering workflow in the Kubernetes cluster. The
         request body is a Chaos Mesh Workflow custom resource that defines the
@@ -552,7 +552,7 @@ paths:
   /workflows/{uid}:
     get:
       operationId: getWorkflow
-      summary: Get workflow details
+      summary: Chaos Mesh Get workflow details
       description: >-
         Returns detailed information about a specific chaos workflow identified by
         its UID. The response includes the workflow topology, node states, and
@@ -576,7 +576,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     put:
       operationId: updateWorkflow
-      summary: Update a workflow
+      summary: Chaos Mesh Update a workflow
       description: >-
         Updates an existing chaos workflow with a new definition. The workflow
         spec is replaced with the provided Kubernetes object description.
@@ -606,7 +606,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteWorkflow
-      summary: Delete a workflow
+      summary: Chaos Mesh Delete a workflow
       description: >-
         Deletes a specific chaos workflow by its UID. The workflow and all its
         associated Kubernetes resources are removed.
@@ -630,7 +630,7 @@ paths:
   /workflows/parse-task/http:
     post:
       operationId: parseWorkflowHttpTask
-      summary: Parse an HTTP workflow task
+      summary: Chaos Mesh Parse an HTTP workflow task
       description: >-
         Parses a rendered HTTP workflow task template back to the original
         request form. Used by the UI to convert between internal representations
@@ -658,7 +658,7 @@ paths:
   /workflows/render-task/http:
     post:
       operationId: renderWorkflowHttpTask
-      summary: Render an HTTP workflow task
+      summary: Chaos Mesh Render an HTTP workflow task
       description: >-
         Renders an HTTP workflow task from a request form into the final template
         format used in workflow definitions. This converts the UI form submission
@@ -686,7 +686,7 @@ paths:
   /workflows/validate-task/http:
     post:
       operationId: validateWorkflowHttpTask
-      summary: Validate an HTTP workflow task
+      summary: Chaos Mesh Validate an HTTP workflow task
       description: >-
         Validates that a given rendered Template is a valid HTTP task. Returns
         true if the template is valid, false or an error if it is not.
@@ -713,7 +713,7 @@ paths:
   /archives:
     get:
       operationId: listArchivedExperiments
-      summary: Get archived chaos experiments
+      summary: Chaos Mesh Get archived chaos experiments
       description: >-
         Returns a list of archived chaos experiments. Experiments are archived
         after they complete their configured duration or are manually deleted.
@@ -763,7 +763,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: batchDeleteArchivedExperiments
-      summary: Delete archived experiments
+      summary: Chaos Mesh Delete archived experiments
       description: >-
         Deletes archived experiment records from the Chaos Mesh database. This
         removes historical records only, not live experiments.
@@ -790,7 +790,7 @@ paths:
   /archives/{uid}:
     get:
       operationId: getArchivedExperiment
-      summary: Get an archived chaos experiment
+      summary: Chaos Mesh Get an archived chaos experiment
       description: >-
         Returns detailed information about a specific archived chaos experiment
         by its UID, including the original experiment spec and metadata.
@@ -813,7 +813,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteArchivedExperiment
-      summary: Delete a specific archived experiment
+      summary: Chaos Mesh Delete a specific archived experiment
       description: >-
         Deletes a single archived experiment record by its UID.
       tags:
@@ -836,7 +836,7 @@ paths:
   /archives/schedules:
     get:
       operationId: listArchivedSchedules
-      summary: Get archived schedule experiments
+      summary: Chaos Mesh Get archived schedule experiments
       description: >-
         Returns a list of archived chaos schedules that have been deleted or
         completed. Useful for reviewing historical scheduled chaos activity.
@@ -871,7 +871,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: batchDeleteArchivedSchedules
-      summary: Delete archived schedules
+      summary: Chaos Mesh Delete archived schedules
       description: >-
         Deletes multiple archived schedule records from the database.
       tags:
@@ -897,7 +897,7 @@ paths:
   /archives/schedules/{uid}:
     get:
       operationId: getArchivedSchedule
-      summary: Get an archived schedule
+      summary: Chaos Mesh Get an archived schedule
       description: >-
         Returns detailed information about a specific archived schedule by its UID.
       tags:
@@ -919,7 +919,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteArchivedSchedule
-      summary: Delete an archived schedule
+      summary: Chaos Mesh Delete an archived schedule
       description: >-
         Deletes a single archived schedule record by its UID.
       tags:
@@ -942,7 +942,7 @@ paths:
   /archives/workflows:
     get:
       operationId: listArchivedWorkflows
-      summary: Get archived workflows
+      summary: Chaos Mesh Get archived workflows
       description: >-
         Returns a list of archived chaos workflows that have been deleted or
         completed.
@@ -971,7 +971,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: batchDeleteArchivedWorkflows
-      summary: Delete archived workflows
+      summary: Chaos Mesh Delete archived workflows
       description: >-
         Deletes multiple archived workflow records from the database.
       tags:
@@ -997,7 +997,7 @@ paths:
   /archives/workflows/{uid}:
     get:
       operationId: getArchivedWorkflow
-      summary: Get an archived workflow
+      summary: Chaos Mesh Get an archived workflow
       description: >-
         Returns detailed information about a specific archived workflow by its UID.
       tags:
@@ -1019,7 +1019,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteArchivedWorkflow
-      summary: Delete an archived workflow
+      summary: Chaos Mesh Delete an archived workflow
       description: >-
         Deletes a single archived workflow record by its UID.
       tags:
@@ -1042,7 +1042,7 @@ paths:
   /events:
     get:
       operationId: listEvents
-      summary: List chaos events
+      summary: Chaos Mesh List chaos events
       description: >-
         Returns a list of chaos experiment events from the Chaos Mesh event store.
         Events record state transitions and fault injection activities. Results
@@ -1108,7 +1108,7 @@ paths:
   /events/{id}:
     get:
       operationId: getEvent
-      summary: Get an event
+      summary: Chaos Mesh Get an event
       description: >-
         Returns a specific chaos event by its integer ID.
       tags:
@@ -1136,7 +1136,7 @@ paths:
   /events/workflow/{uid}:
     get:
       operationId: listWorkflowEvents
-      summary: List events for a workflow
+      summary: Chaos Mesh List events for a workflow
       description: >-
         Returns all events associated with a specific workflow and its related
         child experiments by the workflow UID.
@@ -1162,7 +1162,7 @@ paths:
   /common/config:
     get:
       operationId: getDashboardConfig
-      summary: Get Dashboard configuration
+      summary: Chaos Mesh Get Dashboard configuration
       description: >-
         Returns the current configuration of the Chaos Mesh Dashboard including
         security settings, namespace scope, and feature flags.
@@ -1180,7 +1180,7 @@ paths:
   /common/namespaces:
     get:
       operationId: listNamespaces
-      summary: Get all Kubernetes namespaces
+      summary: Chaos Mesh Get all Kubernetes namespaces
       description: >-
         Returns a list of all namespace names from the Kubernetes cluster. Used
         by the UI for namespace selection dropdowns when scoping experiments.
@@ -1201,7 +1201,7 @@ paths:
   /common/chaos-available-namespaces:
     get:
       operationId: listChaosAvailableNamespaces
-      summary: Get namespaces available for chaos injection
+      summary: Chaos Mesh Get namespaces available for chaos injection
       description: >-
         Returns the list of namespaces where chaos can be injected based on
         Chaos Mesh RBAC configuration and namespace scope settings.
@@ -1222,7 +1222,7 @@ paths:
   /common/kinds:
     get:
       operationId: listChaosKinds
-      summary: Get all available chaos kinds
+      summary: Chaos Mesh Get all available chaos kinds
       description: >-
         Returns a list of all chaos experiment kinds available in the current
         Kubernetes cluster based on installed CRDs. Examples include PodChaos,
@@ -1245,7 +1245,7 @@ paths:
   /common/labels:
     get:
       operationId: getPodLabels
-      summary: Get pod labels
+      summary: Chaos Mesh Get pod labels
       description: >-
         Returns a map of label keys to their possible values for pods in the
         specified namespace. Used by the UI to build label selector inputs for
@@ -1268,7 +1268,7 @@ paths:
   /common/annotations:
     get:
       operationId: getPodAnnotations
-      summary: Get pod annotations
+      summary: Chaos Mesh Get pod annotations
       description: >-
         Returns a map of annotation keys to their possible values for pods in the
         specified namespace.
@@ -1290,7 +1290,7 @@ paths:
   /common/pods:
     post:
       operationId: listPods
-      summary: List pods matching a selector
+      summary: Chaos Mesh List pods matching a selector
       description: >-
         Returns pods from the Kubernetes cluster that match the provided label
         selector. Used by the UI to preview which pods would be targeted by
@@ -1320,7 +1320,7 @@ paths:
   /common/physicalmachines:
     post:
       operationId: listPhysicalMachines
-      summary: List physical machines matching a selector
+      summary: Chaos Mesh List physical machines matching a selector
       description: >-
         Returns PhysicalMachine resources from the Kubernetes cluster that match
         the provided selector. Physical machines are used for chaos experiments
@@ -1350,7 +1350,7 @@ paths:
   /common/rbac-config:
     get:
       operationId: getRbacConfig
-      summary: Get RBAC configuration
+      summary: Chaos Mesh Get RBAC configuration
       description: >-
         Returns the RBAC configuration guidance for setting up Chaos Mesh
         permissions. This endpoint helps users understand what RBAC roles and
@@ -1390,7 +1390,7 @@ paths:
   /templates/statuschecks:
     get:
       operationId: listStatusCheckTemplates
-      summary: List status check templates
+      summary: Chaos Mesh List status check templates
       description: >-
         Returns a list of status check templates available for use in workflows.
         Status checks allow workflows to conditionally proceed based on external
@@ -1420,7 +1420,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createStatusCheckTemplate
-      summary: Create a status check template
+      summary: Chaos Mesh Create a status check template
       description: >-
         Creates a new status check template that can be referenced in workflow
         definitions. The template defines an HTTP endpoint to poll and the
@@ -1448,7 +1448,7 @@ paths:
   /templates/statuschecks/statuscheck:
     get:
       operationId: getStatusCheckTemplate
-      summary: Get a status check template
+      summary: Chaos Mesh Get a status check template
       description: >-
         Returns the detailed definition of a specific status check template
         identified by namespace and name query parameters.
@@ -1477,7 +1477,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     put:
       operationId: updateStatusCheckTemplate
-      summary: Update a status check template
+      summary: Chaos Mesh Update a status check template
       description: >-
         Updates an existing status check template. The full template definition
         must be provided in the request body.
@@ -1505,7 +1505,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteStatusCheckTemplate
-      summary: Delete a status check template
+      summary: Chaos Mesh Delete a status check template
       description: >-
         Deletes a status check template identified by namespace and name query
         parameters.

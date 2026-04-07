@@ -69,7 +69,7 @@ paths:
   /api/experiments:
     get:
       operationId: listExperiments
-      summary: List experiments
+      summary: Chaos Mesh List experiments
       description: >-
         Returns a list of chaos experiments across all or a filtered set of
         namespaces. Results can be filtered by namespace, kind (chaos type),
@@ -99,7 +99,7 @@ paths:
           $ref: '#/components/responses/InternalError'
     post:
       operationId: createExperiment
-      summary: Create an experiment
+      summary: Chaos Mesh Create an experiment
       description: >-
         Creates a new chaos experiment by submitting a Chaos Mesh custom
         resource to Kubernetes. The request body must include the kind field
@@ -130,7 +130,7 @@ paths:
   /api/experiments/{uid}:
     get:
       operationId: getExperiment
-      summary: Get an experiment
+      summary: Chaos Mesh Get an experiment
       description: >-
         Returns detailed information about a specific chaos experiment identified
         by its UID. The response includes the full experiment specification,
@@ -154,7 +154,7 @@ paths:
           $ref: '#/components/responses/InternalError'
     delete:
       operationId: deleteExperiment
-      summary: Delete an experiment
+      summary: Chaos Mesh Delete an experiment
       description: >-
         Deletes a chaos experiment and stops the ongoing fault injection.
         When force is true, the experiment is deleted immediately without
@@ -183,7 +183,7 @@ paths:
   /api/experiments/{uid}/pause:
     put:
       operationId: pauseExperiment
-      summary: Pause an experiment
+      summary: Chaos Mesh Pause an experiment
       description: >-
         Pauses a running chaos experiment, stopping fault injection without
         deleting the experiment resource. The experiment can be resumed by
@@ -205,7 +205,7 @@ paths:
   /api/experiments/{uid}/start:
     put:
       operationId: startExperiment
-      summary: Start (resume) an experiment
+      summary: Chaos Mesh Start (resume) an experiment
       description: >-
         Resumes a paused chaos experiment, reinstating fault injection. Can
         also be used to start an experiment that was created in a paused state.
@@ -225,7 +225,7 @@ paths:
   /api/workflows:
     get:
       operationId: listWorkflows
-      summary: List workflows
+      summary: Chaos Mesh List workflows
       description: >-
         Returns a list of Chaos Mesh workflows. Workflows allow orchestrating
         multiple chaos experiments in serial or parallel sequences. Results
@@ -251,7 +251,7 @@ paths:
           $ref: '#/components/responses/InternalError'
     post:
       operationId: createWorkflow
-      summary: Create a workflow
+      summary: Chaos Mesh Create a workflow
       description: >-
         Creates a new Chaos Mesh workflow for orchestrating multiple chaos
         experiments. The workflow spec defines a directed acyclic graph of
@@ -281,7 +281,7 @@ paths:
   /api/workflows/{uid}:
     get:
       operationId: getWorkflow
-      summary: Get a workflow
+      summary: Chaos Mesh Get a workflow
       description: >-
         Returns detailed information about a specific workflow including its
         current execution state, the status of each task node, and associated
@@ -305,7 +305,7 @@ paths:
           $ref: '#/components/responses/InternalError'
     put:
       operationId: updateWorkflow
-      summary: Update a workflow
+      summary: Chaos Mesh Update a workflow
       description: >-
         Updates an existing workflow definition. The updated spec replaces
         the existing workflow configuration. Running workflow nodes are not
@@ -335,7 +335,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       operationId: deleteWorkflow
-      summary: Delete a workflow
+      summary: Chaos Mesh Delete a workflow
       description: >-
         Deletes a Chaos Mesh workflow and stops any running chaos tasks within
         it. The deleted workflow is moved to the archives.
@@ -353,7 +353,7 @@ paths:
   /api/schedules:
     get:
       operationId: listSchedules
-      summary: List schedules
+      summary: Chaos Mesh List schedules
       description: >-
         Returns a list of chaos experiment schedules. Schedules use cron
         expressions to trigger chaos experiments automatically at configured
@@ -379,7 +379,7 @@ paths:
           $ref: '#/components/responses/InternalError'
     post:
       operationId: createSchedule
-      summary: Create a schedule
+      summary: Chaos Mesh Create a schedule
       description: >-
         Creates a new chaos experiment schedule. The schedule wraps a chaos
         experiment spec with a cron expression and optional history limits.
@@ -409,7 +409,7 @@ paths:
   /api/schedules/{uid}:
     get:
       operationId: getSchedule
-      summary: Get a schedule
+      summary: Chaos Mesh Get a schedule
       description: >-
         Returns detailed information about a specific chaos schedule including
         its cron expression, embedded chaos spec, and history of triggered
@@ -431,7 +431,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       operationId: deleteSchedule
-      summary: Delete a schedule
+      summary: Chaos Mesh Delete a schedule
       description: >-
         Deletes a chaos experiment schedule. No further experiment instances
         will be created. Running experiments triggered by the schedule are
@@ -450,7 +450,7 @@ paths:
   /api/schedules/{uid}/pause:
     put:
       operationId: pauseSchedule
-      summary: Pause a schedule
+      summary: Chaos Mesh Pause a schedule
       description: >-
         Pauses a chaos schedule so that no new experiment instances are created
         while the schedule is suspended. Existing running experiments are not
@@ -469,7 +469,7 @@ paths:
   /api/schedules/{uid}/start:
     put:
       operationId: startSchedule
-      summary: Start (resume) a schedule
+      summary: Chaos Mesh Start (resume) a schedule
       description: >-
         Resumes a paused chaos schedule so that new experiment instances are
         created again on the configured cron schedule.
@@ -487,7 +487,7 @@ paths:
   /api/events:
     get:
       operationId: listEvents
-      summary: List events
+      summary: Chaos Mesh List events
       description: >-
         Returns a list of events generated by chaos experiments, workflows,
         and schedules. Events capture state transitions, errors, and lifecycle
@@ -528,7 +528,7 @@ paths:
   /api/archives:
     get:
       operationId: listArchives
-      summary: List archived experiments
+      summary: Chaos Mesh List archived experiments
       description: >-
         Returns a list of archived (completed or deleted) chaos experiments.
         Archives provide a historical record of past chaos activity. Can be
@@ -555,7 +555,7 @@ paths:
   /api/archives/{uid}:
     get:
       operationId: getArchive
-      summary: Get an archived experiment
+      summary: Chaos Mesh Get an archived experiment
       description: >-
         Returns detailed information about a specific archived chaos experiment
         including its full spec, final status, and all associated events from
@@ -577,7 +577,7 @@ paths:
           $ref: '#/components/responses/NotFound'
     delete:
       operationId: deleteArchive
-      summary: Delete an archive record
+      summary: Chaos Mesh Delete an archive record
       description: >-
         Permanently removes an archived experiment record from the database.
         This does not affect any running Kubernetes resources.
@@ -595,7 +595,7 @@ paths:
   /api/common/namespaces:
     get:
       operationId: listNamespaces
-      summary: List namespaces
+      summary: Chaos Mesh List namespaces
       description: >-
         Returns the list of Kubernetes namespaces available for targeting chaos
         experiments. Used to populate namespace selectors in the Chaos Dashboard
@@ -619,7 +619,7 @@ paths:
   /api/common/pods:
     post:
       operationId: listPodsForSelector
-      summary: List pods for a selector
+      summary: Chaos Mesh List pods for a selector
       description: >-
         Returns a list of pods matching the given label selectors and namespaces.
         Used to preview which pods will be affected by a chaos experiment before
