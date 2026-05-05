@@ -1,0 +1,13 @@
+{
+  "repo": "chaos-mesh",
+  "feeds": [
+    {
+      "source": "https://chaos-mesh.org/blog/",
+      "feed_url": "https://chaos-mesh.org/blog/rss.xml",
+      "saved": 10,
+      "title": "Chaos Mesh Blog"
+    }
+  ],
+  "post_count": 10,
+  "fetched": "2026-05-03T23:25:04Z"
+}
