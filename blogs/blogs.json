@@ -3,11 +3,11 @@
   "feeds": [
     {
       "source": "https://chaos-mesh.org/blog/",
-      "feed_url": "https://chaos-mesh.org/blog/rss.xml",
-      "saved": 10,
-      "title": "Chaos Mesh Blog"
+      "feed_url": "https://chaos-mesh.org/blog/rss",
+      "title": "Chaos Mesh Blog",
+      "saved": 0
     }
   ],
   "post_count": 10,
-  "fetched": "2026-05-03T23:25:04Z"
+  "fetched": "2026-05-09T20:17:51Z"
 }
