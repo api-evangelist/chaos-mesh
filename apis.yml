@@ -2,7 +2,7 @@ aid: chaos-mesh
 url: >-
   https://raw.githubusercontent.com/api-evangelist/chaos-mesh/refs/heads/main/apis.yml
 name: Chaos Mesh
-x-type: opensource
+kind: opensource
 tags:
   - Chaos Engineering
   - Cloud Native
@@ -45,7 +45,7 @@ apis:
     properties:
       - url: https://chaos-mesh.org/docs/
         type: Documentation
-      - type: Getting Started
+      - type: GettingStarted
         url: https://chaos-mesh.org/docs/quick-start/
       - type: GitHubRepository
         url: https://github.com/chaos-mesh/chaos-mesh
