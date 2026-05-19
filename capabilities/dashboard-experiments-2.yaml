@@ -1,0 +1,235 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Experiments
+  description: 'Chaos Mesh Dashboard API — Experiments. 6 operations. Lead operation: Chaos Mesh List experiments. Self-contained
+    Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Experiments
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-experiments-2
+    baseUri: http://{dashboardHost}:{dashboardPort}
+    description: Chaos Mesh Dashboard API — Experiments business capability. Self-contained, no shared references.
+    resources:
+    - name: api-experiments
+      path: /api/experiments
+      operations:
+      - name: listexperiments
+        method: GET
+        description: Chaos Mesh List experiments
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createexperiment
+        method: POST
+        description: Chaos Mesh Create an experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-experiments-uid
+      path: /api/experiments/{uid}
+      operations:
+      - name: getexperiment
+        method: GET
+        description: Chaos Mesh Get an experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deleteexperiment
+        method: DELETE
+        description: Chaos Mesh Delete an experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: force
+          in: query
+          type: boolean
+          description: When true, force-deletes the experiment without waiting for cleanup.
+    - name: api-experiments-uid-pause
+      path: /api/experiments/{uid}/pause
+      operations:
+      - name: pauseexperiment
+        method: PUT
+        description: Chaos Mesh Pause an experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-experiments-uid-start
+      path: /api/experiments/{uid}/start
+      operations:
+      - name: startexperiment
+        method: PUT
+        description: Chaos Mesh Start (resume) an experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.CHAOS_MESH_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: dashboard-experiments-2-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Experiments. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/api/experiments
+      name: api-experiments
+      description: REST surface for api-experiments.
+      operations:
+      - method: GET
+        name: listexperiments
+        description: Chaos Mesh List experiments
+        call: dashboard-experiments-2.listexperiments
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createexperiment
+        description: Chaos Mesh Create an experiment
+        call: dashboard-experiments-2.createexperiment
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/experiments/{uid}
+      name: api-experiments-uid
+      description: REST surface for api-experiments-uid.
+      operations:
+      - method: GET
+        name: getexperiment
+        description: Chaos Mesh Get an experiment
+        call: dashboard-experiments-2.getexperiment
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteexperiment
+        description: Chaos Mesh Delete an experiment
+        call: dashboard-experiments-2.deleteexperiment
+        with:
+          force: rest.force
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/experiments/{uid}/pause
+      name: api-experiments-uid-pause
+      description: REST surface for api-experiments-uid-pause.
+      operations:
+      - method: PUT
+        name: pauseexperiment
+        description: Chaos Mesh Pause an experiment
+        call: dashboard-experiments-2.pauseexperiment
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/experiments/{uid}/start
+      name: api-experiments-uid-start
+      description: REST surface for api-experiments-uid-start.
+      operations:
+      - method: PUT
+        name: startexperiment
+        description: Chaos Mesh Start (resume) an experiment
+        call: dashboard-experiments-2.startexperiment
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-experiments-2-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Experiments. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-list-experiments
+      description: Chaos Mesh List experiments
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-experiments-2.listexperiments
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-create-experiment
+      description: Chaos Mesh Create an experiment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: dashboard-experiments-2.createexperiment
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-experiment
+      description: Chaos Mesh Get an experiment
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-experiments-2.getexperiment
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-experiment
+      description: Chaos Mesh Delete an experiment
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-experiments-2.deleteexperiment
+      with:
+        force: tools.force
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-pause-experiment
+      description: Chaos Mesh Pause an experiment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-experiments-2.pauseexperiment
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-start-resume-experiment
+      description: Chaos Mesh Start (resume) an experiment
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-experiments-2.startexperiment
+      outputParameters:
+      - type: object
+        mapping: $.

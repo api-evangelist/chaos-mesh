@@ -1,0 +1,358 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Common
+  description: 'Chaos Mesh Dashboard API — Common. 9 operations. Lead operation: Chaos Mesh Get pod annotations. Self-contained
+    Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Common
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-common
+    baseUri: http://localhost:2333/api
+    description: Chaos Mesh Dashboard API — Common business capability. Self-contained, no shared references.
+    resources:
+    - name: common-annotations
+      path: /common/annotations
+      operations:
+      - name: getpodannotations
+        method: GET
+        description: Chaos Mesh Get pod annotations
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-chaos-available-namespaces
+      path: /common/chaos-available-namespaces
+      operations:
+      - name: listchaosavailablenamespaces
+        method: GET
+        description: Chaos Mesh Get namespaces available for chaos injection
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-config
+      path: /common/config
+      operations:
+      - name: getdashboardconfig
+        method: GET
+        description: Chaos Mesh Get Dashboard configuration
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-kinds
+      path: /common/kinds
+      operations:
+      - name: listchaoskinds
+        method: GET
+        description: Chaos Mesh Get all available chaos kinds
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-labels
+      path: /common/labels
+      operations:
+      - name: getpodlabels
+        method: GET
+        description: Chaos Mesh Get pod labels
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-namespaces
+      path: /common/namespaces
+      operations:
+      - name: listnamespaces
+        method: GET
+        description: Chaos Mesh Get all Kubernetes namespaces
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: common-physicalmachines
+      path: /common/physicalmachines
+      operations:
+      - name: listphysicalmachines
+        method: POST
+        description: Chaos Mesh List physical machines matching a selector
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: common-pods
+      path: /common/pods
+      operations:
+      - name: listpods
+        method: POST
+        description: Chaos Mesh List pods matching a selector
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: common-rbac-config
+      path: /common/rbac-config
+      operations:
+      - name: getrbacconfig
+        method: GET
+        description: Chaos Mesh Get RBAC configuration
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: role
+          in: query
+          type: string
+          description: Role type to generate RBAC config for (manager or viewer).
+        - name: scope
+          in: query
+          type: string
+          description: Scope of the RBAC config (cluster or namespace).
+  exposes:
+  - type: rest
+    namespace: dashboard-common-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Common. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/common/annotations
+      name: common-annotations
+      description: REST surface for common-annotations.
+      operations:
+      - method: GET
+        name: getpodannotations
+        description: Chaos Mesh Get pod annotations
+        call: dashboard-common.getpodannotations
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/chaos-available-namespaces
+      name: common-chaos-available-namespaces
+      description: REST surface for common-chaos-available-namespaces.
+      operations:
+      - method: GET
+        name: listchaosavailablenamespaces
+        description: Chaos Mesh Get namespaces available for chaos injection
+        call: dashboard-common.listchaosavailablenamespaces
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/config
+      name: common-config
+      description: REST surface for common-config.
+      operations:
+      - method: GET
+        name: getdashboardconfig
+        description: Chaos Mesh Get Dashboard configuration
+        call: dashboard-common.getdashboardconfig
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/kinds
+      name: common-kinds
+      description: REST surface for common-kinds.
+      operations:
+      - method: GET
+        name: listchaoskinds
+        description: Chaos Mesh Get all available chaos kinds
+        call: dashboard-common.listchaoskinds
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/labels
+      name: common-labels
+      description: REST surface for common-labels.
+      operations:
+      - method: GET
+        name: getpodlabels
+        description: Chaos Mesh Get pod labels
+        call: dashboard-common.getpodlabels
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/namespaces
+      name: common-namespaces
+      description: REST surface for common-namespaces.
+      operations:
+      - method: GET
+        name: listnamespaces
+        description: Chaos Mesh Get all Kubernetes namespaces
+        call: dashboard-common.listnamespaces
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/physicalmachines
+      name: common-physicalmachines
+      description: REST surface for common-physicalmachines.
+      operations:
+      - method: POST
+        name: listphysicalmachines
+        description: Chaos Mesh List physical machines matching a selector
+        call: dashboard-common.listphysicalmachines
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/pods
+      name: common-pods
+      description: REST surface for common-pods.
+      operations:
+      - method: POST
+        name: listpods
+        description: Chaos Mesh List pods matching a selector
+        call: dashboard-common.listpods
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/common/rbac-config
+      name: common-rbac-config
+      description: REST surface for common-rbac-config.
+      operations:
+      - method: GET
+        name: getrbacconfig
+        description: Chaos Mesh Get RBAC configuration
+        call: dashboard-common.getrbacconfig
+        with:
+          role: rest.role
+          scope: rest.scope
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-common-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Common. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-get-pod-annotations
+      description: Chaos Mesh Get pod annotations
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.getpodannotations
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-namespaces-available
+      description: Chaos Mesh Get namespaces available for chaos injection
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.listchaosavailablenamespaces
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-dashboard-configuration
+      description: Chaos Mesh Get Dashboard configuration
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.getdashboardconfig
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-all-available
+      description: Chaos Mesh Get all available chaos kinds
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.listchaoskinds
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-pod-labels
+      description: Chaos Mesh Get pod labels
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.getpodlabels
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-all-kubernetes
+      description: Chaos Mesh Get all Kubernetes namespaces
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.listnamespaces
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-list-physical-machines
+      description: Chaos Mesh List physical machines matching a selector
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: dashboard-common.listphysicalmachines
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-list-pods-matching
+      description: Chaos Mesh List pods matching a selector
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: dashboard-common.listpods
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-rbac-configuration
+      description: Chaos Mesh Get RBAC configuration
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-common.getrbacconfig
+      with:
+        role: tools.role
+        scope: tools.scope
+      outputParameters:
+      - type: object
+        mapping: $.

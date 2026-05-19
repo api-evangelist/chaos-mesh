@@ -1,0 +1,223 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Templates
+  description: 'Chaos Mesh Dashboard API — Templates. 5 operations. Lead operation: Chaos Mesh List status check templates.
+    Self-contained Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Templates
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-templates
+    baseUri: http://localhost:2333/api
+    description: Chaos Mesh Dashboard API — Templates business capability. Self-contained, no shared references.
+    resources:
+    - name: templates-statuschecks
+      path: /templates/statuschecks
+      operations:
+      - name: liststatuschecktemplates
+        method: GET
+        description: Chaos Mesh List status check templates
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Filter templates by name.
+      - name: createstatuschecktemplate
+        method: POST
+        description: Chaos Mesh Create a status check template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: templates-statuschecks-statuscheck
+      path: /templates/statuschecks/statuscheck
+      operations:
+      - name: getstatuschecktemplate
+        method: GET
+        description: Chaos Mesh Get a status check template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Name of the status check template.
+          required: true
+      - name: updatestatuschecktemplate
+        method: PUT
+        description: Chaos Mesh Update a status check template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deletestatuschecktemplate
+        method: DELETE
+        description: Chaos Mesh Delete a status check template
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Name of the status check template to delete.
+          required: true
+  exposes:
+  - type: rest
+    namespace: dashboard-templates-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Templates. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/templates/statuschecks
+      name: templates-statuschecks
+      description: REST surface for templates-statuschecks.
+      operations:
+      - method: GET
+        name: liststatuschecktemplates
+        description: Chaos Mesh List status check templates
+        call: dashboard-templates.liststatuschecktemplates
+        with:
+          name: rest.name
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createstatuschecktemplate
+        description: Chaos Mesh Create a status check template
+        call: dashboard-templates.createstatuschecktemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/templates/statuschecks/statuscheck
+      name: templates-statuschecks-statuscheck
+      description: REST surface for templates-statuschecks-statuscheck.
+      operations:
+      - method: GET
+        name: getstatuschecktemplate
+        description: Chaos Mesh Get a status check template
+        call: dashboard-templates.getstatuschecktemplate
+        with:
+          name: rest.name
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updatestatuschecktemplate
+        description: Chaos Mesh Update a status check template
+        call: dashboard-templates.updatestatuschecktemplate
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletestatuschecktemplate
+        description: Chaos Mesh Delete a status check template
+        call: dashboard-templates.deletestatuschecktemplate
+        with:
+          name: rest.name
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-templates-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Templates. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-list-status-check
+      description: Chaos Mesh List status check templates
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-templates.liststatuschecktemplates
+      with:
+        name: tools.name
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-create-status-check
+      description: Chaos Mesh Create a status check template
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: dashboard-templates.createstatuschecktemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-status-check
+      description: Chaos Mesh Get a status check template
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-templates.getstatuschecktemplate
+      with:
+        name: tools.name
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-update-status-check
+      description: Chaos Mesh Update a status check template
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-templates.updatestatuschecktemplate
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-status-check
+      description: Chaos Mesh Delete a status check template
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-templates.deletestatuschecktemplate
+      with:
+        name: tools.name
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,180 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Events
+  description: 'Chaos Mesh Dashboard API — Events. 3 operations. Lead operation: Chaos Mesh List chaos events. Self-contained
+    Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Events
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-events
+    baseUri: http://localhost:2333/api
+    description: Chaos Mesh Dashboard API — Events business capability. Self-contained, no shared references.
+    resources:
+    - name: events
+      path: /events
+      operations:
+      - name: listevents
+        method: GET
+        description: Chaos Mesh List chaos events
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: object_id
+          in: query
+          type: string
+          description: Filter events by the UID of the associated experiment or workflow.
+        - name: name
+          in: query
+          type: string
+          description: Filter events by experiment name.
+        - name: kind
+          in: query
+          type: string
+          description: Filter events by chaos kind.
+        - name: start
+          in: query
+          type: string
+          description: Filter events from this timestamp (RFC3339).
+        - name: end
+          in: query
+          type: string
+          description: Filter events up to this timestamp (RFC3339).
+        - name: limit
+          in: query
+          type: integer
+          description: Maximum number of events to return.
+    - name: events-workflow-uid
+      path: /events/workflow/{uid}
+      operations:
+      - name: listworkflowevents
+        method: GET
+        description: Chaos Mesh List events for a workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: events-id
+      path: /events/{id}
+      operations:
+      - name: getevent
+        method: GET
+        description: Chaos Mesh Get an event
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: id
+          in: path
+          type: integer
+          description: Integer ID of the event.
+          required: true
+  exposes:
+  - type: rest
+    namespace: dashboard-events-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Events. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/events
+      name: events
+      description: REST surface for events.
+      operations:
+      - method: GET
+        name: listevents
+        description: Chaos Mesh List chaos events
+        call: dashboard-events.listevents
+        with:
+          object_id: rest.object_id
+          name: rest.name
+          kind: rest.kind
+          start: rest.start
+          end: rest.end
+          limit: rest.limit
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/events/workflow/{uid}
+      name: events-workflow-uid
+      description: REST surface for events-workflow-uid.
+      operations:
+      - method: GET
+        name: listworkflowevents
+        description: Chaos Mesh List events for a workflow
+        call: dashboard-events.listworkflowevents
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/events/{id}
+      name: events-id
+      description: REST surface for events-id.
+      operations:
+      - method: GET
+        name: getevent
+        description: Chaos Mesh Get an event
+        call: dashboard-events.getevent
+        with:
+          id: rest.id
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-events-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Events. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-list-chaos-events
+      description: Chaos Mesh List chaos events
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-events.listevents
+      with:
+        object_id: tools.object_id
+        name: tools.name
+        kind: tools.kind
+        start: tools.start
+        end: tools.end
+        limit: tools.limit
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-list-events-workflow
+      description: Chaos Mesh List events for a workflow
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-events.listworkflowevents
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-event
+      description: Chaos Mesh Get an event
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-events.getevent
+      with:
+        id: tools.id
+      outputParameters:
+      - type: object
+        mapping: $.

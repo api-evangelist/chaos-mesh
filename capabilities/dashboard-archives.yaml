@@ -1,0 +1,458 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Archives
+  description: 'Chaos Mesh Dashboard API — Archives. 12 operations. Lead operation: Chaos Mesh Get archived chaos experiments.
+    Self-contained Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Archives
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-archives
+    baseUri: http://localhost:2333/api
+    description: Chaos Mesh Dashboard API — Archives business capability. Self-contained, no shared references.
+    resources:
+    - name: archives
+      path: /archives
+      operations:
+      - name: listarchivedexperiments
+        method: GET
+        description: Chaos Mesh Get archived chaos experiments
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Filter by experiment name.
+        - name: kind
+          in: query
+          type: string
+          description: Filter by chaos kind.
+        - name: start
+          in: query
+          type: string
+          description: Filter events from this timestamp (RFC3339).
+        - name: end
+          in: query
+          type: string
+          description: Filter events up to this timestamp (RFC3339).
+      - name: batchdeletearchivedexperiments
+        method: DELETE
+        description: Chaos Mesh Delete archived experiments
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: uids
+          in: query
+          type: string
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+    - name: archives-schedules
+      path: /archives/schedules
+      operations:
+      - name: listarchivedschedules
+        method: GET
+        description: Chaos Mesh Get archived schedule experiments
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Filter by schedule name.
+        - name: kind
+          in: query
+          type: string
+          description: Filter by chaos kind.
+      - name: batchdeletearchivedschedules
+        method: DELETE
+        description: Chaos Mesh Delete archived schedules
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: uids
+          in: query
+          type: string
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+    - name: archives-schedules-uid
+      path: /archives/schedules/{uid}
+      operations:
+      - name: getarchivedschedule
+        method: GET
+        description: Chaos Mesh Get an archived schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deletearchivedschedule
+        method: DELETE
+        description: Chaos Mesh Delete an archived schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: archives-workflows
+      path: /archives/workflows
+      operations:
+      - name: listarchivedworkflows
+        method: GET
+        description: Chaos Mesh Get archived workflows
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Filter by workflow name.
+      - name: batchdeletearchivedworkflows
+        method: DELETE
+        description: Chaos Mesh Delete archived workflows
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: uids
+          in: query
+          type: string
+          description: Comma-separated list of archive UIDs to delete.
+          required: true
+    - name: archives-workflows-uid
+      path: /archives/workflows/{uid}
+      operations:
+      - name: getarchivedworkflow
+        method: GET
+        description: Chaos Mesh Get an archived workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deletearchivedworkflow
+        method: DELETE
+        description: Chaos Mesh Delete an archived workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: archives-uid
+      path: /archives/{uid}
+      operations:
+      - name: getarchivedexperiment
+        method: GET
+        description: Chaos Mesh Get an archived chaos experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deletearchivedexperiment
+        method: DELETE
+        description: Chaos Mesh Delete a specific archived experiment
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: dashboard-archives-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Archives. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/archives
+      name: archives
+      description: REST surface for archives.
+      operations:
+      - method: GET
+        name: listarchivedexperiments
+        description: Chaos Mesh Get archived chaos experiments
+        call: dashboard-archives.listarchivedexperiments
+        with:
+          name: rest.name
+          kind: rest.kind
+          start: rest.start
+          end: rest.end
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: batchdeletearchivedexperiments
+        description: Chaos Mesh Delete archived experiments
+        call: dashboard-archives.batchdeletearchivedexperiments
+        with:
+          uids: rest.uids
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/archives/schedules
+      name: archives-schedules
+      description: REST surface for archives-schedules.
+      operations:
+      - method: GET
+        name: listarchivedschedules
+        description: Chaos Mesh Get archived schedule experiments
+        call: dashboard-archives.listarchivedschedules
+        with:
+          name: rest.name
+          kind: rest.kind
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: batchdeletearchivedschedules
+        description: Chaos Mesh Delete archived schedules
+        call: dashboard-archives.batchdeletearchivedschedules
+        with:
+          uids: rest.uids
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/archives/schedules/{uid}
+      name: archives-schedules-uid
+      description: REST surface for archives-schedules-uid.
+      operations:
+      - method: GET
+        name: getarchivedschedule
+        description: Chaos Mesh Get an archived schedule
+        call: dashboard-archives.getarchivedschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletearchivedschedule
+        description: Chaos Mesh Delete an archived schedule
+        call: dashboard-archives.deletearchivedschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/archives/workflows
+      name: archives-workflows
+      description: REST surface for archives-workflows.
+      operations:
+      - method: GET
+        name: listarchivedworkflows
+        description: Chaos Mesh Get archived workflows
+        call: dashboard-archives.listarchivedworkflows
+        with:
+          name: rest.name
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: batchdeletearchivedworkflows
+        description: Chaos Mesh Delete archived workflows
+        call: dashboard-archives.batchdeletearchivedworkflows
+        with:
+          uids: rest.uids
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/archives/workflows/{uid}
+      name: archives-workflows-uid
+      description: REST surface for archives-workflows-uid.
+      operations:
+      - method: GET
+        name: getarchivedworkflow
+        description: Chaos Mesh Get an archived workflow
+        call: dashboard-archives.getarchivedworkflow
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletearchivedworkflow
+        description: Chaos Mesh Delete an archived workflow
+        call: dashboard-archives.deletearchivedworkflow
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/archives/{uid}
+      name: archives-uid
+      description: REST surface for archives-uid.
+      operations:
+      - method: GET
+        name: getarchivedexperiment
+        description: Chaos Mesh Get an archived chaos experiment
+        call: dashboard-archives.getarchivedexperiment
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deletearchivedexperiment
+        description: Chaos Mesh Delete a specific archived experiment
+        call: dashboard-archives.deletearchivedexperiment
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-archives-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Archives. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-get-archived-chaos
+      description: Chaos Mesh Get archived chaos experiments
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.listarchivedexperiments
+      with:
+        name: tools.name
+        kind: tools.kind
+        start: tools.start
+        end: tools.end
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-archived-experiments
+      description: Chaos Mesh Delete archived experiments
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.batchdeletearchivedexperiments
+      with:
+        uids: tools.uids
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-archived-schedule
+      description: Chaos Mesh Get archived schedule experiments
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.listarchivedschedules
+      with:
+        name: tools.name
+        kind: tools.kind
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-archived-schedules
+      description: Chaos Mesh Delete archived schedules
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.batchdeletearchivedschedules
+      with:
+        uids: tools.uids
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-archived-schedule-2
+      description: Chaos Mesh Get an archived schedule
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.getarchivedschedule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-archived-schedule
+      description: Chaos Mesh Delete an archived schedule
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.deletearchivedschedule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-archived-workflows
+      description: Chaos Mesh Get archived workflows
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.listarchivedworkflows
+      with:
+        name: tools.name
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-archived-workflows
+      description: Chaos Mesh Delete archived workflows
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.batchdeletearchivedworkflows
+      with:
+        uids: tools.uids
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-archived-workflow
+      description: Chaos Mesh Get an archived workflow
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.getarchivedworkflow
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-archived-workflow
+      description: Chaos Mesh Delete an archived workflow
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.deletearchivedworkflow
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-archived-chaos-2
+      description: Chaos Mesh Get an archived chaos experiment
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-archives.getarchivedexperiment
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-specific-archived
+      description: Chaos Mesh Delete a specific archived experiment
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-archives.deletearchivedexperiment
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,335 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Workflows
+  description: 'Chaos Mesh Dashboard API — Workflows. 8 operations. Lead operation: Chaos Mesh List workflows. Self-contained
+    Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Workflows
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-workflows
+    baseUri: http://localhost:2333/api
+    description: Chaos Mesh Dashboard API — Workflows business capability. Self-contained, no shared references.
+    resources:
+    - name: workflows
+      path: /workflows
+      operations:
+      - name: listworkflows
+        method: GET
+        description: Chaos Mesh List workflows
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: name
+          in: query
+          type: string
+          description: Filter workflows by name.
+        - name: status
+          in: query
+          type: string
+          description: Filter workflows by status.
+      - name: createworkflow
+        method: POST
+        description: Chaos Mesh Create a new workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: workflows-parse-task-http
+      path: /workflows/parse-task/http
+      operations:
+      - name: parseworkflowhttptask
+        method: POST
+        description: Chaos Mesh Parse an HTTP workflow task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: workflows-render-task-http
+      path: /workflows/render-task/http
+      operations:
+      - name: renderworkflowhttptask
+        method: POST
+        description: Chaos Mesh Render an HTTP workflow task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: workflows-validate-task-http
+      path: /workflows/validate-task/http
+      operations:
+      - name: validateworkflowhttptask
+        method: POST
+        description: Chaos Mesh Validate an HTTP workflow task
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: workflows-uid
+      path: /workflows/{uid}
+      operations:
+      - name: getworkflow
+        method: GET
+        description: Chaos Mesh Get workflow details
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: updateworkflow
+        method: PUT
+        description: Chaos Mesh Update a workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+      - name: deleteworkflow
+        method: DELETE
+        description: Chaos Mesh Delete a workflow
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+  exposes:
+  - type: rest
+    namespace: dashboard-workflows-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Workflows. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/workflows
+      name: workflows
+      description: REST surface for workflows.
+      operations:
+      - method: GET
+        name: listworkflows
+        description: Chaos Mesh List workflows
+        call: dashboard-workflows.listworkflows
+        with:
+          name: rest.name
+          status: rest.status
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createworkflow
+        description: Chaos Mesh Create a new workflow
+        call: dashboard-workflows.createworkflow
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/workflows/parse-task/http
+      name: workflows-parse-task-http
+      description: REST surface for workflows-parse-task-http.
+      operations:
+      - method: POST
+        name: parseworkflowhttptask
+        description: Chaos Mesh Parse an HTTP workflow task
+        call: dashboard-workflows.parseworkflowhttptask
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/workflows/render-task/http
+      name: workflows-render-task-http
+      description: REST surface for workflows-render-task-http.
+      operations:
+      - method: POST
+        name: renderworkflowhttptask
+        description: Chaos Mesh Render an HTTP workflow task
+        call: dashboard-workflows.renderworkflowhttptask
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/workflows/validate-task/http
+      name: workflows-validate-task-http
+      description: REST surface for workflows-validate-task-http.
+      operations:
+      - method: POST
+        name: validateworkflowhttptask
+        description: Chaos Mesh Validate an HTTP workflow task
+        call: dashboard-workflows.validateworkflowhttptask
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/workflows/{uid}
+      name: workflows-uid
+      description: REST surface for workflows-uid.
+      operations:
+      - method: GET
+        name: getworkflow
+        description: Chaos Mesh Get workflow details
+        call: dashboard-workflows.getworkflow
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: PUT
+        name: updateworkflow
+        description: Chaos Mesh Update a workflow
+        call: dashboard-workflows.updateworkflow
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteworkflow
+        description: Chaos Mesh Delete a workflow
+        call: dashboard-workflows.deleteworkflow
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-workflows-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Workflows. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-list-workflows
+      description: Chaos Mesh List workflows
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-workflows.listworkflows
+      with:
+        name: tools.name
+        status: tools.status
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-create-new-workflow
+      description: Chaos Mesh Create a new workflow
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: dashboard-workflows.createworkflow
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-parse-http-workflow
+      description: Chaos Mesh Parse an HTTP workflow task
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: dashboard-workflows.parseworkflowhttptask
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-render-http-workflow
+      description: Chaos Mesh Render an HTTP workflow task
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: dashboard-workflows.renderworkflowhttptask
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-validate-http-workflow
+      description: Chaos Mesh Validate an HTTP workflow task
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: false
+      call: dashboard-workflows.validateworkflowhttptask
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-workflow-details
+      description: Chaos Mesh Get workflow details
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-workflows.getworkflow
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-update-workflow
+      description: Chaos Mesh Update a workflow
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-workflows.updateworkflow
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-workflow
+      description: Chaos Mesh Delete a workflow
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-workflows.deleteworkflow
+      outputParameters:
+      - type: object
+        mapping: $.

@@ -1,0 +1,226 @@
+naftiko: 1.0.0-alpha2
+info:
+  label: Chaos Mesh Dashboard API — Schedules
+  description: 'Chaos Mesh Dashboard API — Schedules. 6 operations. Lead operation: Chaos Mesh List schedules. Self-contained
+    Naftiko capability covering one Chaos Mesh business surface.'
+  tags:
+  - Chaos Mesh
+  - Schedules
+  created: '2026-05-19'
+  modified: '2026-05-19'
+binds:
+- namespace: env
+  keys:
+    CHAOS_MESH_API_KEY: CHAOS_MESH_API_KEY
+capability:
+  consumes:
+  - type: http
+    namespace: dashboard-schedules-2
+    baseUri: http://{dashboardHost}:{dashboardPort}
+    description: Chaos Mesh Dashboard API — Schedules business capability. Self-contained, no shared references.
+    resources:
+    - name: api-schedules
+      path: /api/schedules
+      operations:
+      - name: listschedules
+        method: GET
+        description: Chaos Mesh List schedules
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: createschedule
+        method: POST
+        description: Chaos Mesh Create a schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+        inputParameters:
+        - name: body
+          in: body
+          type: object
+          description: Request body (JSON).
+          required: true
+    - name: api-schedules-uid
+      path: /api/schedules/{uid}
+      operations:
+      - name: getschedule
+        method: GET
+        description: Chaos Mesh Get a schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+      - name: deleteschedule
+        method: DELETE
+        description: Chaos Mesh Delete a schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-schedules-uid-pause
+      path: /api/schedules/{uid}/pause
+      operations:
+      - name: pauseschedule
+        method: PUT
+        description: Chaos Mesh Pause a schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    - name: api-schedules-uid-start
+      path: /api/schedules/{uid}/start
+      operations:
+      - name: startschedule
+        method: PUT
+        description: Chaos Mesh Start (resume) a schedule
+        outputRawFormat: json
+        outputParameters:
+        - name: result
+          type: object
+          value: $.
+    authentication:
+      type: bearer
+      token: '{{env.CHAOS_MESH_API_KEY}}'
+  exposes:
+  - type: rest
+    namespace: dashboard-schedules-2-rest
+    port: 8080
+    description: REST adapter for Chaos Mesh Dashboard API — Schedules. One Spectral-compliant resource per consumed operation,
+      prefixed with /v1.
+    resources:
+    - path: /v1/api/schedules
+      name: api-schedules
+      description: REST surface for api-schedules.
+      operations:
+      - method: GET
+        name: listschedules
+        description: Chaos Mesh List schedules
+        call: dashboard-schedules-2.listschedules
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: POST
+        name: createschedule
+        description: Chaos Mesh Create a schedule
+        call: dashboard-schedules-2.createschedule
+        with:
+          body: rest.body
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/schedules/{uid}
+      name: api-schedules-uid
+      description: REST surface for api-schedules-uid.
+      operations:
+      - method: GET
+        name: getschedule
+        description: Chaos Mesh Get a schedule
+        call: dashboard-schedules-2.getschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+      - method: DELETE
+        name: deleteschedule
+        description: Chaos Mesh Delete a schedule
+        call: dashboard-schedules-2.deleteschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/schedules/{uid}/pause
+      name: api-schedules-uid-pause
+      description: REST surface for api-schedules-uid-pause.
+      operations:
+      - method: PUT
+        name: pauseschedule
+        description: Chaos Mesh Pause a schedule
+        call: dashboard-schedules-2.pauseschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+    - path: /v1/api/schedules/{uid}/start
+      name: api-schedules-uid-start
+      description: REST surface for api-schedules-uid-start.
+      operations:
+      - method: PUT
+        name: startschedule
+        description: Chaos Mesh Start (resume) a schedule
+        call: dashboard-schedules-2.startschedule
+        outputParameters:
+        - type: object
+          mapping: $.
+  - type: mcp
+    namespace: dashboard-schedules-2-mcp
+    port: 9090
+    transport: http
+    description: MCP adapter for Chaos Mesh Dashboard API — Schedules. One tool per consumed operation, routed inline through
+      this capability's consumes block.
+    tools:
+    - name: chaos-mesh-list-schedules
+      description: Chaos Mesh List schedules
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-schedules-2.listschedules
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-create-schedule
+      description: Chaos Mesh Create a schedule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: false
+      call: dashboard-schedules-2.createschedule
+      with:
+        body: tools.body
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-get-schedule
+      description: Chaos Mesh Get a schedule
+      hints:
+        readOnly: true
+        destructive: false
+        idempotent: true
+      call: dashboard-schedules-2.getschedule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-delete-schedule
+      description: Chaos Mesh Delete a schedule
+      hints:
+        readOnly: false
+        destructive: true
+        idempotent: true
+      call: dashboard-schedules-2.deleteschedule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-pause-schedule
+      description: Chaos Mesh Pause a schedule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-schedules-2.pauseschedule
+      outputParameters:
+      - type: object
+        mapping: $.
+    - name: chaos-mesh-start-resume-schedule
+      description: Chaos Mesh Start (resume) a schedule
+      hints:
+        readOnly: false
+        destructive: false
+        idempotent: true
+      call: dashboard-schedules-2.startschedule
+      outputParameters:
+      - type: object
+        mapping: $.
