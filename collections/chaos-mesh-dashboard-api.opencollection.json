@@ -1,0 +1,1166 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Experiments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by name (partial match supported)."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by chaos kind (e.g., PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos)."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by status (e.g., running, paused, finished)."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiments from the Kubernetes cluster. Results can be filtered by namespace, name, kind of chaos, and status. Each experiment entry includes its UID, name, namespace, kind, creation time, and current status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/experiments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos experiment in the Kubernetes cluster by submitting a chaos custom resource definition. The request body should contain a valid Chaos Mesh custom resource object such as PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, or other supported chaos kinds. The experiment begins injecting faults immediately upon creation."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Batch delete chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/experiments",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of experiment UIDs to delete."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete experiments without waiting for fault cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes multiple chaos experiments in a single request. Experiment UIDs to be deleted are specified as a comma-separated list in the uids query parameter. Force deletion bypasses graceful cleanup of injected faults."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos experiment identified by its UID. The response includes the full experiment spec, current status, and associated Kubernetes resource details."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete without waiting for fault cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos experiment by its UID. The experiment and its associated Kubernetes custom resource are removed. In-progress fault injections are terminated during cleanup."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/experiments/pause/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Pauses a running chaos experiment by its UID. When paused, fault injection is suspended but the experiment resource is retained. The experiment can be resumed with the start endpoint."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/experiments/start/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos experiment by its UID. Once started, fault injection resumes according to the experiment spec. This endpoint is used to unpause experiments that were previously paused."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get the status of all experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments/state",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a summary of experiment counts grouped by status across the cluster. Useful for dashboard overview displays showing how many experiments are running, paused, stopped, or finished."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Schedules",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/schedules",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by chaos kind."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by status."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos schedules from the Kubernetes cluster. Schedules define recurring chaos experiments using cron expressions. Results can be filtered by namespace, name, and kind."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/schedules",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos schedule that runs a chaos experiment on a recurring cron schedule. The request body is a Chaos Mesh Schedule custom resource which wraps a chaos experiment spec with scheduling parameters including the cron expression, history limit, and concurrency policy."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Batch delete schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/schedules",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of schedule UIDs to delete."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete schedules without graceful cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes multiple chaos schedules in a single request using a comma-separated list of UIDs."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos schedule identified by its UID, including its cron expression, experiment template, and execution history."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete without graceful cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos schedule by its UID. The schedule and all its associated Kubernetes resources are removed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/schedules/pause/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Pauses a chaos schedule by its UID, preventing future scheduled runs from executing. Currently running experiments triggered by the schedule are not affected."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/schedules/start/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos schedule by its UID, allowing future cron-triggered runs to execute again."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Workflows",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/workflows",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter workflows by name."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter workflows by status."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos engineering workflows from the Kubernetes cluster. Workflows allow orchestrating multiple chaos experiments as a sequence of steps with parallel execution, conditional branching, and timing controls. Results can be filtered by namespace, name, and status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos engineering workflow in the Kubernetes cluster. The request body is a Chaos Mesh Workflow custom resource that defines the entry point and sequence of chaos steps to execute, including serial and parallel task groups, suspends, and HTTP tasks."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get workflow details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos workflow identified by its UID. The response includes the workflow topology, node states, and execution progress of each step."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Update a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing chaos workflow with a new definition. The workflow spec is replaced with the provided Kubernetes object description."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos workflow by its UID. The workflow and all its associated Kubernetes resources are removed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Parse an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/parse-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Parses a rendered HTTP workflow task template back to the original request form. Used by the UI to convert between internal representations and editable form data for HTTP tasks in workflows."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Render an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/render-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Renders an HTTP workflow task from a request form into the final template format used in workflow definitions. This converts the UI form submission into the internal Template representation."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Validate an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/validate-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Validates that a given rendered Template is a valid HTTP task. Returns true if the template is valid, false or an error if it is not."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Archives",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by experiment name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter by chaos kind."
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Filter events from this timestamp (RFC3339)."
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "Filter events up to this timestamp (RFC3339)."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos experiments. Experiments are archived after they complete their configured duration or are manually deleted. Results can be filtered by namespace, name, kind, and time range."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes archived experiment records from the Chaos Mesh database. This removes historical records only, not live experiments."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived chaos experiment by its UID, including the original experiment spec and metadata."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a specific archived experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived experiment record by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived schedule experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/schedules",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by schedule name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter by chaos kind."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos schedules that have been deleted or completed. Useful for reviewing historical scheduled chaos activity."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/schedules",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes multiple archived schedule records from the database."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived schedule by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an archived schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived schedule record by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/workflows",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by workflow name."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos workflows that have been deleted or completed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/workflows",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes multiple archived workflow records from the database."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived workflow by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an archived workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived workflow record by its UID."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Events",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events",
+            "params": [
+              {
+                "name": "object_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by the UID of the associated experiment or workflow."
+              },
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by experiment name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by chaos kind."
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Filter events from this timestamp (RFC3339)."
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "Filter events up to this timestamp (RFC3339)."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of events to return."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiment events from the Chaos Mesh event store. Events record state transitions and fault injection activities. Results can be filtered by object UID, namespace, name, kind, and time range."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an event",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Integer ID of the event."
+              }
+            ]
+          },
+          "docs": "Returns a specific chaos event by its integer ID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List events for a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events/workflow/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns all events associated with a specific workflow and its related child experiments by the workflow UID."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Common",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh Get Dashboard configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/config"
+          },
+          "docs": "Returns the current configuration of the Chaos Mesh Dashboard including security settings, namespace scope, and feature flags."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get all Kubernetes namespaces",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/namespaces"
+          },
+          "docs": "Returns a list of all namespace names from the Kubernetes cluster. Used by the UI for namespace selection dropdowns when scoping experiments."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get namespaces available for chaos injection",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/chaos-available-namespaces"
+          },
+          "docs": "Returns the list of namespaces where chaos can be injected based on Chaos Mesh RBAC configuration and namespace scope settings."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get all available chaos kinds",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/kinds"
+          },
+          "docs": "Returns a list of all chaos experiment kinds available in the current Kubernetes cluster based on installed CRDs. Examples include PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, and cloud provider chaos types."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get pod labels",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/labels",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a map of label keys to their possible values for pods in the specified namespace. Used by the UI to build label selector inputs for targeting experiments at specific pods."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get pod annotations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/annotations",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a map of annotation keys to their possible values for pods in the specified namespace."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List pods matching a selector",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/common/pods",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns pods from the Kubernetes cluster that match the provided label selector. Used by the UI to preview which pods would be targeted by an experiment before creating it."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List physical machines matching a selector",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/common/physicalmachines",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns PhysicalMachine resources from the Kubernetes cluster that match the provided selector. Physical machines are used for chaos experiments targeting bare-metal or VM hosts via the chaos-daemon."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get RBAC configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/rbac-config",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "role",
+                "value": "",
+                "type": "query",
+                "description": "Role type to generate RBAC config for (manager or viewer)."
+              },
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "Scope of the RBAC config (cluster or namespace)."
+              }
+            ]
+          },
+          "docs": "Returns the RBAC configuration guidance for setting up Chaos Mesh permissions. This endpoint helps users understand what RBAC roles and bindings are needed to run chaos experiments in their chosen namespace with their chosen scope."
+        }
+      ]
+    },
+    {
+      "info": {
+        "name": "Templates",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List status check templates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/templates/statuschecks",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter templates by name."
+              }
+            ]
+          },
+          "docs": "Returns a list of status check templates available for use in workflows. Status checks allow workflows to conditionally proceed based on external HTTP endpoint health checks."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/templates/statuschecks",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new status check template that can be referenced in workflow definitions. The template defines an HTTP endpoint to poll and the criteria for determining success or failure."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name of the status check template."
+              }
+            ]
+          },
+          "docs": "Returns the detailed definition of a specific status check template identified by namespace and name query parameters."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Update a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing status check template. The full template definition must be provided in the request body."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name of the status check template to delete."
+              }
+            ]
+          },
+          "docs": "Deletes a status check template identified by namespace and name query parameters."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
