@@ -1,0 +1,15 @@
+generated: '2026-07-11'
+method: derived
+source: openapi/chaos-mesh-dashboard-openapi.yml
+summary:
+  types:
+  - http
+schemes:
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  description: Bearer token for authenticating API requests. Typically a Kubernetes service
+    account token with RBAC permissions to read/write Chaos Mesh custom resources in the target
+    namespaces.
+  sources:
+  - openapi/chaos-mesh-dashboard-openapi.yml
