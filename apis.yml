@@ -57,6 +57,8 @@ apis:
       request injection. The Chaos Dashboard exposes a REST API for creating, running, scheduling, and observing
       experiments and multi-step workflows, with RBAC and event auditing.
 common:
+  - type: AgenticAccess
+    url: agentic-access/chaos-mesh-agentic-access.yml
   - type: DomainSecurity
     url: security/chaos-mesh-domain-security.yml
   - type: Authentication
