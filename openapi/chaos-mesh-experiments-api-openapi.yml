@@ -1,0 +1,746 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard Archives Experiments API
+  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: http://localhost:2333/api
+  description: Default Chaos Mesh Dashboard server
+tags:
+- name: Experiments
+  description: Create, manage, pause, and delete chaos experiments
+paths:
+  /experiments:
+    get:
+      operationId: listExperiments
+      summary: Chaos Mesh List chaos experiments
+      description: Returns a list of chaos experiments from the Kubernetes cluster. Results can be filtered by namespace, name, kind of chaos, and status. Each experiment entry includes its UID, name, namespace, kind, creation time, and current status.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter experiments by name (partial match supported).
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        description: Filter experiments by chaos kind (e.g., PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos).
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: Filter experiments by status (e.g., running, paused, finished).
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of chaos experiments returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Experiment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createExperiment
+      summary: Chaos Mesh Create a new chaos experiment
+      description: Creates a new chaos experiment in the Kubernetes cluster by submitting a chaos custom resource definition. The request body should contain a valid Chaos Mesh custom resource object such as PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, or other supported chaos kinds. The experiment begins injecting faults immediately upon creation.
+      tags:
+      - Experiments
+      requestBody:
+        description: Chaos experiment custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Experiment created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KubeObjectDesc'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteExperiments
+      summary: Chaos Mesh Batch delete chaos experiments
+      description: Deletes multiple chaos experiments in a single request. Experiment UIDs to be deleted are specified as a comma-separated list in the uids query parameter. Force deletion bypasses graceful cleanup of injected faults.
+      tags:
+      - Experiments
+      parameters:
+      - name: uids
+        in: query
+        description: Comma-separated list of experiment UIDs to delete.
+        required: true
+        schema:
+          type: string
+      - name: force
+        in: query
+        description: Force delete experiments without waiting for fault cleanup.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Experiments deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/{uid}:
+    get:
+      operationId: getExperiment
+      summary: Chaos Mesh Get a chaos experiment
+      description: Returns detailed information about a specific chaos experiment identified by its UID. The response includes the full experiment spec, current status, and associated Kubernetes resource details.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteExperiment
+      summary: Chaos Mesh Delete a chaos experiment
+      description: Deletes a specific chaos experiment by its UID. The experiment and its associated Kubernetes custom resource are removed. In-progress fault injections are terminated during cleanup.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      - name: force
+        in: query
+        description: Force delete without waiting for fault cleanup.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Experiment deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/pause/{uid}:
+    put:
+      operationId: pauseExperiment
+      summary: Chaos Mesh Pause a chaos experiment
+      description: Pauses a running chaos experiment by its UID. When paused, fault injection is suspended but the experiment resource is retained. The experiment can be resumed with the start endpoint.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment paused successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/start/{uid}:
+    put:
+      operationId: startExperiment
+      summary: Chaos Mesh Start a chaos experiment
+      description: Resumes a paused chaos experiment by its UID. Once started, fault injection resumes according to the experiment spec. This endpoint is used to unpause experiments that were previously paused.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Experiment started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /experiments/state:
+    get:
+      operationId: getExperimentsState
+      summary: Chaos Mesh Get the status of all experiments
+      description: Returns a summary of experiment counts grouped by status across the cluster. Useful for dashboard overview displays showing how many experiments are running, paused, stopped, or finished.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Experiment status summary returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/experiments:
+    get:
+      operationId: listExperiments
+      summary: Chaos Mesh List experiments
+      description: Returns a list of chaos experiments across all or a filtered set of namespaces. Results can be filtered by namespace, kind (chaos type), name substring, and status. Each experiment entry includes the chaos type, namespace, name, current status, and creation timestamp.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/NamespaceQuery'
+      - $ref: '#/components/parameters/KindQuery'
+      - $ref: '#/components/parameters/NameQuery'
+      - $ref: '#/components/parameters/StatusQuery'
+      responses:
+        '200':
+          description: List of experiments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExperimentSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      operationId: createExperiment
+      summary: Chaos Mesh Create an experiment
+      description: Creates a new chaos experiment by submitting a Chaos Mesh custom resource to Kubernetes. The request body must include the kind field specifying the chaos type (e.g., PodChaos, NetworkChaos) and a spec field with the chaos-type-specific configuration. The experiment begins immediately upon creation unless a duration or schedule is specified.
+      tags:
+      - Experiments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperimentCreateRequest'
+      responses:
+        '200':
+          description: Experiment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentDetail_2'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/experiments/{uid}:
+    get:
+      operationId: getExperiment
+      summary: Chaos Mesh Get an experiment
+      description: Returns detailed information about a specific chaos experiment identified by its UID. The response includes the full experiment specification, current status, affected pods, and event history.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/ExperimentUID'
+      responses:
+        '200':
+          description: Experiment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentDetail_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      operationId: deleteExperiment
+      summary: Chaos Mesh Delete an experiment
+      description: Deletes a chaos experiment and stops the ongoing fault injection. When force is true, the experiment is deleted immediately without waiting for graceful cleanup. The deleted experiment is moved to the archives.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/ExperimentUID'
+      - name: force
+        in: query
+        required: false
+        description: When true, force-deletes the experiment without waiting for cleanup.
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Experiment deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/experiments/{uid}/pause:
+    put:
+      operationId: pauseExperiment
+      summary: Chaos Mesh Pause an experiment
+      description: Pauses a running chaos experiment, stopping fault injection without deleting the experiment resource. The experiment can be resumed by calling the start endpoint. Useful for temporarily halting chaos during incident response.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/ExperimentUID'
+      responses:
+        '200':
+          description: Experiment paused successfully
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+  /api/experiments/{uid}/start:
+    put:
+      operationId: startExperiment
+      summary: Chaos Mesh Start (resume) an experiment
+      description: Resumes a paused chaos experiment, reinstating fault injection. Can also be used to start an experiment that was created in a paused state.
+      tags:
+      - Experiments
+      parameters:
+      - $ref: '#/components/parameters/ExperimentUID'
+      responses:
+        '200':
+          description: Experiment started successfully
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+components:
+  schemas:
+    ExperimentState:
+      type: object
+      description: Summary count of experiments grouped by status.
+      properties:
+        running:
+          type: integer
+          description: Number of currently running experiments.
+        paused:
+          type: integer
+          description: Number of paused experiments.
+        stopped:
+          type: integer
+          description: Number of stopped experiments.
+        finished:
+          type: integer
+          description: Number of finished experiments.
+        total:
+          type: integer
+          description: Total number of experiments.
+    ExperimentSummary:
+      type: object
+      description: Summary of a chaos experiment as returned in list operations.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the experiment.
+        kind:
+          type: string
+          description: Chaos type kind, e.g., PodChaos or NetworkChaos.
+          example: PodChaos
+        namespace:
+          type: string
+          description: Kubernetes namespace containing the experiment.
+          example: default
+        name:
+          type: string
+          description: Name of the experiment resource.
+          example: pod-failure-test
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        status:
+          type: string
+          description: Current status of the experiment.
+          enum:
+          - injecting
+          - running
+          - finished
+          - paused
+          - stopped
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    Experiment:
+      type: object
+      description: Summary of a Chaos Mesh experiment stored in the Chaos Mesh database.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the experiment.
+        name:
+          type: string
+          description: Name of the experiment Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace containing the experiment.
+        kind:
+          type: string
+          description: Chaos kind of the experiment (e.g., PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos).
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        status:
+          type: string
+          description: Current status of the experiment (e.g., running, paused, finished).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    ExperimentCreateRequest:
+      type: object
+      description: Request body for creating a chaos experiment. The apiVersion, kind, metadata, and spec fields map directly to a Kubernetes custom resource manifest.
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          description: Chaos Mesh API version.
+          const: chaos-mesh.org/v1alpha1
+        kind:
+          type: string
+          description: Chaos type kind.
+          enum:
+          - PodChaos
+          - NetworkChaos
+          - IOChaos
+          - StressChaos
+          - HTTPChaos
+          - TimeChaos
+          - DNSChaos
+          - KernelChaos
+          - AWSChaos
+          - GCPChaos
+          - JVMChaos
+          - PhysicalMachineChaos
+          example: PodChaos
+        metadata:
+          type: object
+          description: Kubernetes object metadata.
+          required:
+          - name
+          - namespace
+          properties:
+            name:
+              type: string
+              description: Name for the experiment resource.
+              example: pod-failure-test
+            namespace:
+              type: string
+              description: Kubernetes namespace to create the experiment in.
+              example: default
+            labels:
+              type: object
+              description: Labels to attach to the experiment resource.
+              additionalProperties:
+                type: string
+            annotations:
+              type: object
+              description: Annotations to attach to the experiment resource.
+              additionalProperties:
+                type: string
+        spec:
+          type: object
+          description: Chaos experiment specification. The structure varies by kind. Refer to the Chaos Mesh CRD reference for field details per type.
+          additionalProperties: true
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    ExperimentDetail:
+      type: object
+      description: Detailed information about a chaos experiment including its Kubernetes resource.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the experiment.
+        name:
+          type: string
+          description: Name of the experiment.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the experiment.
+        kind:
+          type: string
+          description: Chaos kind of the experiment.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        status:
+          type: string
+          description: Current status of the experiment.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    KubeObjectDesc:
+      type: object
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      properties:
+        apiVersion:
+          type: string
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    ExperimentDetail_2:
+      type: object
+      description: Full details of a chaos experiment including spec, status, and affected resources.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the experiment.
+        kind:
+          type: string
+          description: Chaos type kind.
+          example: NetworkChaos
+        namespace:
+          type: string
+          description: Kubernetes namespace of the experiment.
+        name:
+          type: string
+          description: Name of the experiment resource.
+        spec:
+          type: object
+          description: Full chaos experiment specification as a Kubernetes custom resource spec. Structure varies by kind.
+          additionalProperties: true
+        status:
+          type: string
+          description: Current execution status.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was created.
+        experiment_info:
+          type: object
+          description: Derived experiment information including the list of affected pods.
+          additionalProperties: true
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  parameters:
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Status to filter experiments or schedules by.
+      schema:
+        type: string
+        enum:
+        - injecting
+        - running
+        - finished
+        - paused
+        - stopped
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    KindQuery:
+      name: kind
+      in: query
+      required: false
+      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
+      schema:
+        type: string
+        enum:
+        - PodChaos
+        - NetworkChaos
+        - IOChaos
+        - StressChaos
+        - HTTPChaos
+        - TimeChaos
+        - DNSChaos
+        - KernelChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - PhysicalMachineChaos
+    ExperimentUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the chaos experiment.
+      schema:
+        type: string
+        format: uuid
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/

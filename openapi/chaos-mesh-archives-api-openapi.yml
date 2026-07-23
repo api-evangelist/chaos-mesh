@@ -1,0 +1,666 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard Archives API
+  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: http://localhost:2333/api
+  description: Default Chaos Mesh Dashboard server
+tags:
+- name: Archives
+  description: Access archived (completed or deleted) experiments, schedules, and workflows
+paths:
+  /archives:
+    get:
+      operationId: listArchivedExperiments
+      summary: Chaos Mesh Get archived chaos experiments
+      description: Returns a list of archived chaos experiments. Experiments are archived after they complete their configured duration or are manually deleted. Results can be filtered by namespace, name, kind, and time range.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter by experiment name.
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        description: Filter by chaos kind.
+        required: false
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Filter events from this timestamp (RFC3339).
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: end
+        in: query
+        description: Filter events up to this timestamp (RFC3339).
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: List of archived experiments returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedExperiments
+      summary: Chaos Mesh Delete archived experiments
+      description: Deletes archived experiment records from the Chaos Mesh database. This removes historical records only, not live experiments.
+      tags:
+      - Archives
+      parameters:
+      - name: uids
+        in: query
+        description: Comma-separated list of archive UIDs to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/{uid}:
+    get:
+      operationId: getArchivedExperiment
+      summary: Chaos Mesh Get an archived chaos experiment
+      description: Returns detailed information about a specific archived chaos experiment by its UID, including the original experiment spec and metadata.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived experiment details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedExperiment
+      summary: Chaos Mesh Delete a specific archived experiment
+      description: Deletes a single archived experiment record by its UID.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/schedules:
+    get:
+      operationId: listArchivedSchedules
+      summary: Chaos Mesh Get archived schedule experiments
+      description: Returns a list of archived chaos schedules that have been deleted or completed. Useful for reviewing historical scheduled chaos activity.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter by schedule name.
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        description: Filter by chaos kind.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of archived schedules returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedSchedules
+      summary: Chaos Mesh Delete archived schedules
+      description: Deletes multiple archived schedule records from the database.
+      tags:
+      - Archives
+      parameters:
+      - name: uids
+        in: query
+        description: Comma-separated list of archive UIDs to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/schedules/{uid}:
+    get:
+      operationId: getArchivedSchedule
+      summary: Chaos Mesh Get an archived schedule
+      description: Returns detailed information about a specific archived schedule by its UID.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived schedule details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedSchedule
+      summary: Chaos Mesh Delete an archived schedule
+      description: Deletes a single archived schedule record by its UID.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/workflows:
+    get:
+      operationId: listArchivedWorkflows
+      summary: Chaos Mesh Get archived workflows
+      description: Returns a list of archived chaos workflows that have been deleted or completed.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter by workflow name.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of archived workflows returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Archive'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteArchivedWorkflows
+      summary: Chaos Mesh Delete archived workflows
+      description: Deletes multiple archived workflow records from the database.
+      tags:
+      - Archives
+      parameters:
+      - name: uids
+        in: query
+        description: Comma-separated list of archive UIDs to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Archives deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /archives/workflows/{uid}:
+    get:
+      operationId: getArchivedWorkflow
+      summary: Chaos Mesh Get an archived workflow
+      description: Returns detailed information about a specific archived workflow by its UID.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archived workflow details returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteArchivedWorkflow
+      summary: Chaos Mesh Delete an archived workflow
+      description: Deletes a single archived workflow record by its UID.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Archive deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/archives:
+    get:
+      operationId: listArchives
+      summary: Chaos Mesh List archived experiments
+      description: Returns a list of archived (completed or deleted) chaos experiments. Archives provide a historical record of past chaos activity. Can be filtered by namespace, name, and kind.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/NamespaceQuery'
+      - $ref: '#/components/parameters/NameQuery'
+      - $ref: '#/components/parameters/KindQuery'
+      responses:
+        '200':
+          description: List of archived experiments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArchiveSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/archives/{uid}:
+    get:
+      operationId: getArchive
+      summary: Chaos Mesh Get an archived experiment
+      description: Returns detailed information about a specific archived chaos experiment including its full spec, final status, and all associated events from its lifetime.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/ArchiveUID'
+      responses:
+        '200':
+          description: Archive details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveDetail_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+    delete:
+      operationId: deleteArchive
+      summary: Chaos Mesh Delete an archive record
+      description: Permanently removes an archived experiment record from the database. This does not affect any running Kubernetes resources.
+      tags:
+      - Archives
+      parameters:
+      - $ref: '#/components/parameters/ArchiveUID'
+      responses:
+        '200':
+          description: Archive deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+components:
+  schemas:
+    ArchiveDetail:
+      type: object
+      description: Detailed information about an archived chaos resource.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived resource.
+        name:
+          type: string
+          description: Name of the archived resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace where the resource existed.
+        kind:
+          type: string
+          description: Chaos kind or resource type.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was originally created.
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was archived.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    Archive:
+      type: object
+      description: Summary record of an archived chaos experiment, schedule, or workflow.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived resource.
+        name:
+          type: string
+          description: Name of the archived resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace where the resource existed.
+        kind:
+          type: string
+          description: Chaos kind or resource type of the archived resource.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was originally created.
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was deleted and archived.
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    ArchiveDetail_2:
+      type: object
+      description: Full details of an archived chaos experiment.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived experiment.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the archived experiment.
+        name:
+          type: string
+          description: Name of the archived experiment.
+        kind:
+          type: string
+          description: Chaos type kind.
+        spec:
+          type: object
+          description: Original chaos experiment specification at the time of archival.
+          additionalProperties: true
+        start_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment began.
+        finish_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was archived.
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    KubeObjectDesc:
+      type: object
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      properties:
+        apiVersion:
+          type: string
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    ArchiveSummary:
+      type: object
+      description: Summary entry for an archived chaos experiment in the historical record.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived experiment.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the archived experiment.
+        name:
+          type: string
+          description: Name of the archived experiment.
+        kind:
+          type: string
+          description: Chaos type kind of the archived experiment.
+        start_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment started.
+        finish_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was archived.
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  parameters:
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    ArchiveUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the archived experiment.
+      schema:
+        type: string
+        format: uuid
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    KindQuery:
+      name: kind
+      in: query
+      required: false
+      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
+      schema:
+        type: string
+        enum:
+        - PodChaos
+        - NetworkChaos
+        - IOChaos
+        - StressChaos
+        - HTTPChaos
+        - TimeChaos
+        - DNSChaos
+        - KernelChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - PhysicalMachineChaos
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/

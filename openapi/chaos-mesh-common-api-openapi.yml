@@ -1,0 +1,476 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard Archives Common API
+  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: http://localhost:2333/api
+  description: Default Chaos Mesh Dashboard server
+tags:
+- name: Common
+  description: Utility endpoints for cluster metadata, namespaces, and configuration
+paths:
+  /common/config:
+    get:
+      operationId: getDashboardConfig
+      summary: Chaos Mesh Get Dashboard configuration
+      description: Returns the current configuration of the Chaos Mesh Dashboard including security settings, namespace scope, and feature flags.
+      tags:
+      - Common
+      responses:
+        '200':
+          description: Dashboard configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardConfig'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/namespaces:
+    get:
+      operationId: listNamespaces
+      summary: Chaos Mesh Get all Kubernetes namespaces
+      description: Returns a list of all namespace names from the Kubernetes cluster. Used by the UI for namespace selection dropdowns when scoping experiments.
+      tags:
+      - Common
+      responses:
+        '200':
+          description: List of namespaces returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Kubernetes namespace name.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/chaos-available-namespaces:
+    get:
+      operationId: listChaosAvailableNamespaces
+      summary: Chaos Mesh Get namespaces available for chaos injection
+      description: Returns the list of namespaces where chaos can be injected based on Chaos Mesh RBAC configuration and namespace scope settings.
+      tags:
+      - Common
+      responses:
+        '200':
+          description: List of available namespaces returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Kubernetes namespace name.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/kinds:
+    get:
+      operationId: listChaosKinds
+      summary: Chaos Mesh Get all available chaos kinds
+      description: Returns a list of all chaos experiment kinds available in the current Kubernetes cluster based on installed CRDs. Examples include PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, and cloud provider chaos types.
+      tags:
+      - Common
+      responses:
+        '200':
+          description: List of chaos kinds returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Chaos kind name (Kubernetes CRD kind).
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/labels:
+    get:
+      operationId: getPodLabels
+      summary: Chaos Mesh Get pod labels
+      description: Returns a map of label keys to their possible values for pods in the specified namespace. Used by the UI to build label selector inputs for targeting experiments at specific pods.
+      tags:
+      - Common
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Pod labels returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/annotations:
+    get:
+      operationId: getPodAnnotations
+      summary: Chaos Mesh Get pod annotations
+      description: Returns a map of annotation keys to their possible values for pods in the specified namespace.
+      tags:
+      - Common
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      responses:
+        '200':
+          description: Pod annotations returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/pods:
+    post:
+      operationId: listPods
+      summary: Chaos Mesh List pods matching a selector
+      description: Returns pods from the Kubernetes cluster that match the provided label selector. Used by the UI to preview which pods would be targeted by an experiment before creating it.
+      tags:
+      - Common
+      requestBody:
+        description: Label selector to filter pods.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectorRequest'
+      responses:
+        '200':
+          description: Matching pods returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pod'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/physicalmachines:
+    post:
+      operationId: listPhysicalMachines
+      summary: Chaos Mesh List physical machines matching a selector
+      description: Returns PhysicalMachine resources from the Kubernetes cluster that match the provided selector. Physical machines are used for chaos experiments targeting bare-metal or VM hosts via the chaos-daemon.
+      tags:
+      - Common
+      requestBody:
+        description: Selector to filter physical machines.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectorRequest'
+      responses:
+        '200':
+          description: Matching physical machines returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhysicalMachine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /common/rbac-config:
+    get:
+      operationId: getRbacConfig
+      summary: Chaos Mesh Get RBAC configuration
+      description: Returns the RBAC configuration guidance for setting up Chaos Mesh permissions. This endpoint helps users understand what RBAC roles and bindings are needed to run chaos experiments in their chosen namespace with their chosen scope.
+      tags:
+      - Common
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: role
+        in: query
+        description: Role type to generate RBAC config for (manager or viewer).
+        required: false
+        schema:
+          type: string
+          enum:
+          - manager
+          - viewer
+      - name: scope
+        in: query
+        description: Scope of the RBAC config (cluster or namespace).
+        required: false
+        schema:
+          type: string
+          enum:
+          - cluster
+          - namespace
+      responses:
+        '200':
+          description: RBAC configuration returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapStringSliceResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/common/namespaces:
+    get:
+      operationId: listNamespaces
+      summary: Chaos Mesh List namespaces
+      description: Returns the list of Kubernetes namespaces available for targeting chaos experiments. Used to populate namespace selectors in the Chaos Dashboard UI.
+      tags:
+      - Common
+      responses:
+        '200':
+          description: List of namespace names
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: Kubernetes namespace name.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/common/pods:
+    post:
+      operationId: listPodsForSelector
+      summary: Chaos Mesh List pods for a selector
+      description: Returns a list of pods matching the given label selectors and namespaces. Used to preview which pods will be affected by a chaos experiment before creating it, so operators can verify their target selector.
+      tags:
+      - Common
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodSelectorRequest'
+      responses:
+        '200':
+          description: List of matching pods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PodInfo'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  schemas:
+    Pod:
+      type: object
+      description: Summary of a Kubernetes pod available for chaos targeting.
+      properties:
+        name:
+          type: string
+          description: Pod name.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the pod.
+        ip:
+          type: string
+          description: Pod IP address.
+        state:
+          type: string
+          description: Pod state (e.g., Running, Pending, Succeeded, Failed).
+    DashboardConfig:
+      type: object
+      description: Configuration settings for the Chaos Mesh Dashboard.
+      properties:
+        security_mode:
+          type: boolean
+          description: Whether security mode requiring authentication is enabled.
+        dns_server_create:
+          type: boolean
+          description: Whether Chaos Mesh should create a DNS server for DNS chaos.
+        version:
+          type: string
+          description: Version of Chaos Mesh currently running.
+        enable_filter_namespace:
+          type: boolean
+          description: Whether namespace filtering is enabled for the dashboard.
+    SelectorRequest:
+      type: object
+      description: Request body for selecting pods or physical machines by label selectors.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace to search.
+        label_selectors:
+          type: object
+          description: Key-value pairs for label selection.
+          additionalProperties:
+            type: string
+        annotation_selectors:
+          type: object
+          description: Key-value pairs for annotation selection.
+          additionalProperties:
+            type: string
+    MapStringSliceResponse:
+      type: object
+      description: A map from string keys to arrays of string values.
+      additionalProperties:
+        type: array
+        items:
+          type: string
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    PhysicalMachine:
+      type: object
+      description: A physical machine or VM registered as a Chaos Mesh target.
+      properties:
+        name:
+          type: string
+          description: Name of the PhysicalMachine resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        address:
+          type: string
+          description: Network address of the physical machine's chaos-daemon.
+    PodSelectorRequest:
+      type: object
+      description: Request body for previewing which pods match a chaos experiment selector before creating the experiment.
+      required:
+      - namespaces
+      - labelSelectors
+      properties:
+        namespaces:
+          type: array
+          description: Kubernetes namespaces to search for matching pods.
+          items:
+            type: string
+          example:
+          - default
+          - production
+        labelSelectors:
+          type: object
+          description: Key-value label selectors to match pods. All specified labels must match.
+          additionalProperties:
+            type: string
+          example:
+            app: frontend
+        expressionSelectors:
+          type: array
+          description: Advanced Kubernetes label selector expressions.
+          items:
+            type: object
+            additionalProperties: true
+        pods:
+          type: object
+          description: Explicit pod name lists per namespace for fixed targeting rather than label-based selection.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    PodInfo:
+      type: object
+      description: Information about a Kubernetes pod that could be targeted by a chaos experiment.
+      properties:
+        name:
+          type: string
+          description: Name of the pod.
+          example: frontend-abc123
+        namespace:
+          type: string
+          description: Kubernetes namespace of the pod.
+          example: default
+        ip:
+          type: string
+          description: IP address of the pod.
+          format: ipv4
+          example: 10.0.0.5
+        host:
+          type: string
+          description: Kubernetes node name where the pod is running.
+          example: worker-node-1
+        status:
+          type: string
+          description: Current phase of the pod.
+          enum:
+          - Pending
+          - Running
+          - Succeeded
+          - Failed
+          - Unknown
+  responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/

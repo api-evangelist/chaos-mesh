@@ -1,0 +1,646 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard Archives Schedules API
+  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: http://localhost:2333/api
+  description: Default Chaos Mesh Dashboard server
+tags:
+- name: Schedules
+  description: Create and manage scheduled chaos experiments
+paths:
+  /schedules:
+    get:
+      operationId: listSchedules
+      summary: Chaos Mesh List chaos schedules
+      description: Returns a list of chaos schedules from the Kubernetes cluster. Schedules define recurring chaos experiments using cron expressions. Results can be filtered by namespace, name, and kind.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter schedules by name.
+        required: false
+        schema:
+          type: string
+      - name: kind
+        in: query
+        description: Filter schedules by chaos kind.
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: Filter schedules by status.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of schedules returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Schedule'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createSchedule
+      summary: Chaos Mesh Create a new schedule
+      description: Creates a new chaos schedule that runs a chaos experiment on a recurring cron schedule. The request body is a Chaos Mesh Schedule custom resource which wraps a chaos experiment spec with scheduling parameters including the cron expression, history limit, and concurrency policy.
+      tags:
+      - Schedules
+      requestBody:
+        description: Schedule custom resource definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KubeObjectDesc'
+      responses:
+        '200':
+          description: Schedule created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KubeObjectDesc'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: batchDeleteSchedules
+      summary: Chaos Mesh Batch delete schedules
+      description: Deletes multiple chaos schedules in a single request using a comma-separated list of UIDs.
+      tags:
+      - Schedules
+      parameters:
+      - name: uids
+        in: query
+        description: Comma-separated list of schedule UIDs to delete.
+        required: true
+        schema:
+          type: string
+      - name: force
+        in: query
+        description: Force delete schedules without graceful cleanup.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Schedules deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/{uid}:
+    get:
+      operationId: getSchedule
+      summary: Chaos Mesh Get a schedule
+      description: Returns detailed information about a specific chaos schedule identified by its UID, including its cron expression, experiment template, and execution history.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule details returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteSchedule
+      summary: Chaos Mesh Delete a schedule
+      description: Deletes a specific chaos schedule by its UID. The schedule and all its associated Kubernetes resources are removed.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      - name: force
+        in: query
+        description: Force delete without graceful cleanup.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: Schedule deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/pause/{uid}:
+    put:
+      operationId: pauseSchedule
+      summary: Chaos Mesh Pause a schedule
+      description: Pauses a chaos schedule by its UID, preventing future scheduled runs from executing. Currently running experiments triggered by the schedule are not affected.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule paused successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /schedules/start/{uid}:
+    put:
+      operationId: startSchedule
+      summary: Chaos Mesh Start a schedule
+      description: Resumes a paused chaos schedule by its UID, allowing future cron-triggered runs to execute again.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/uidParam'
+      responses:
+        '200':
+          description: Schedule started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/schedules:
+    get:
+      operationId: listSchedules
+      summary: Chaos Mesh List schedules
+      description: Returns a list of chaos experiment schedules. Schedules use cron expressions to trigger chaos experiments automatically at configured intervals. Results can be filtered by namespace, name, and status.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/NamespaceQuery'
+      - $ref: '#/components/parameters/NameQuery'
+      - $ref: '#/components/parameters/StatusQuery'
+      responses:
+        '200':
+          description: List of schedules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScheduleSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      operationId: createSchedule
+      summary: Chaos Mesh Create a schedule
+      description: Creates a new chaos experiment schedule. The schedule wraps a chaos experiment spec with a cron expression and optional history limits. The chaos experiment is instantiated automatically each time the schedule fires.
+      tags:
+      - Schedules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleCreateRequest'
+      responses:
+        '200':
+          description: Schedule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleDetail_2'
+        '400':
+          $ref: '#/components/responses/BadRequest_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/schedules/{uid}:
+    get:
+      operationId: getSchedule
+      summary: Chaos Mesh Get a schedule
+      description: Returns detailed information about a specific chaos schedule including its cron expression, embedded chaos spec, and history of triggered experiment instances.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/ScheduleUID'
+      responses:
+        '200':
+          description: Schedule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleDetail_2'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+    delete:
+      operationId: deleteSchedule
+      summary: Chaos Mesh Delete a schedule
+      description: Deletes a chaos experiment schedule. No further experiment instances will be created. Running experiments triggered by the schedule are not affected.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/ScheduleUID'
+      responses:
+        '200':
+          description: Schedule deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+  /api/schedules/{uid}/pause:
+    put:
+      operationId: pauseSchedule
+      summary: Chaos Mesh Pause a schedule
+      description: Pauses a chaos schedule so that no new experiment instances are created while the schedule is suspended. Existing running experiments are not affected.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/ScheduleUID'
+      responses:
+        '200':
+          description: Schedule paused
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+  /api/schedules/{uid}/start:
+    put:
+      operationId: startSchedule
+      summary: Chaos Mesh Start (resume) a schedule
+      description: Resumes a paused chaos schedule so that new experiment instances are created again on the configured cron schedule.
+      tags:
+      - Schedules
+      parameters:
+      - $ref: '#/components/parameters/ScheduleUID'
+      responses:
+        '200':
+          description: Schedule resumed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound_2'
+components:
+  schemas:
+    ScheduleDetail:
+      type: object
+      description: Detailed information about a chaos schedule.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the schedule.
+        name:
+          type: string
+          description: Name of the schedule.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        kind:
+          type: string
+          description: Chaos kind used by this schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
+        status:
+          type: string
+          description: Current status of the schedule.
+        kube_object:
+          $ref: '#/components/schemas/KubeObjectDesc'
+    Schedule:
+      type: object
+      description: Summary of a Chaos Mesh schedule.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the schedule.
+        name:
+          type: string
+          description: Name of the schedule resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        kind:
+          type: string
+          description: Chaos kind used by this schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
+        status:
+          type: string
+          description: Current status of the schedule.
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    ScheduleDetail_2:
+      type: object
+      description: Full details of a chaos schedule including spec and experiment history.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the schedule.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        name:
+          type: string
+          description: Name of the schedule resource.
+        spec:
+          type: object
+          description: Full schedule specification as a Kubernetes custom resource spec.
+          additionalProperties: true
+        status:
+          type: string
+          description: Current execution status.
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    KubeObjectDesc:
+      type: object
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      properties:
+        apiVersion:
+          type: string
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    ScheduleSummary:
+      type: object
+      description: Summary of a chaos schedule as returned in list operations.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the schedule.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        name:
+          type: string
+          description: Name of the schedule resource.
+        kind:
+          type: string
+          description: Chaos type kind of the wrapped experiment.
+        status:
+          type: string
+          description: Current status of the schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
+    ScheduleCreateRequest:
+      type: object
+      description: Request body for creating a chaos experiment schedule.
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          const: chaos-mesh.org/v1alpha1
+          description: Chaos Mesh API version.
+        kind:
+          type: string
+          const: Schedule
+          description: Resource kind identifier.
+        metadata:
+          type: object
+          description: Kubernetes object metadata.
+          required:
+          - name
+          - namespace
+          properties:
+            name:
+              type: string
+              description: Name of the schedule resource.
+            namespace:
+              type: string
+              description: Kubernetes namespace for the schedule.
+        spec:
+          type: object
+          description: Schedule specification containing the cron expression, concurrency policy, history limits, and embedded chaos experiment spec.
+          required:
+          - schedule
+          - type
+          properties:
+            schedule:
+              type: string
+              description: Cron expression defining when to trigger the experiment, e.g., '@every 10m' or '0 * * * *'.
+              example: '@every 1h'
+            concurrencyPolicy:
+              type: string
+              description: Policy controlling what to do when a new experiment trigger fires while a previous one is still running.
+              enum:
+              - Forbid
+              - Allow
+              default: Forbid
+            historyLimit:
+              type: integer
+              description: Maximum number of completed experiment instances to retain.
+              minimum: 0
+              default: 1
+            type:
+              type: string
+              description: Chaos type kind for the embedded experiment.
+              example: PodChaos
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  parameters:
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Status to filter experiments or schedules by.
+      schema:
+        type: string
+        enum:
+        - injecting
+        - running
+        - finished
+        - paused
+        - stopped
+    ScheduleUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the schedule.
+      schema:
+        type: string
+        format: uuid
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/

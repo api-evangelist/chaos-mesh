@@ -1,0 +1,308 @@
+openapi: 3.1.0
+info:
+  title: Chaos Mesh Dashboard Archives Templates API
+  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
+  version: '2.5'
+  contact:
+    name: Chaos Mesh Community
+    url: https://chaos-mesh.org/community/
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+- url: http://localhost:2333/api
+  description: Default Chaos Mesh Dashboard server
+tags:
+- name: Templates
+  description: Manage reusable status check templates for workflows
+paths:
+  /templates/statuschecks:
+    get:
+      operationId: listStatusCheckTemplates
+      summary: Chaos Mesh List status check templates
+      description: Returns a list of status check templates available for use in workflows. Status checks allow workflows to conditionally proceed based on external HTTP endpoint health checks.
+      tags:
+      - Templates
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Filter templates by name.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of status check templates returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusCheckTemplateBase'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createStatusCheckTemplate
+      summary: Chaos Mesh Create a status check template
+      description: Creates a new status check template that can be referenced in workflow definitions. The template defines an HTTP endpoint to poll and the criteria for determining success or failure.
+      tags:
+      - Templates
+      requestBody:
+        description: Status check template to create.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusCheckTemplate'
+      responses:
+        '200':
+          description: Template created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /templates/statuschecks/statuscheck:
+    get:
+      operationId: getStatusCheckTemplate
+      summary: Chaos Mesh Get a status check template
+      description: Returns the detailed definition of a specific status check template identified by namespace and name query parameters.
+      tags:
+      - Templates
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Name of the status check template.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Status check template returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplateDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: updateStatusCheckTemplate
+      summary: Chaos Mesh Update a status check template
+      description: Updates an existing status check template. The full template definition must be provided in the request body.
+      tags:
+      - Templates
+      requestBody:
+        description: Updated status check template definition.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusCheckTemplate'
+      responses:
+        '200':
+          description: Template updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusCheckTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteStatusCheckTemplate
+      summary: Chaos Mesh Delete a status check template
+      description: Deletes a status check template identified by namespace and name query parameters.
+      tags:
+      - Templates
+      parameters:
+      - $ref: '#/components/parameters/namespaceParam'
+      - name: name
+        in: query
+        description: Name of the status check template to delete.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Template deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+  schemas:
+    HTTPStatusCheckSpec:
+      type: object
+      description: HTTP-specific configuration for a status check.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to poll for the health check.
+        method:
+          type: string
+          enum:
+          - GET
+          - POST
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        body:
+          type: string
+          description: Request body for POST requests.
+        criteria:
+          $ref: '#/components/schemas/HTTPCriteria'
+    HTTPCriteria:
+      type: object
+      description: Criteria for determining a successful status check response.
+      properties:
+        statusCode:
+          type: string
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
+    StatusCheckSpec:
+      type: object
+      description: Specification for a status check that polls an HTTP endpoint.
+      properties:
+        type:
+          type: string
+          description: Type of status check (currently HTTP).
+          enum:
+          - HTTP
+        intervalSeconds:
+          type: integer
+          minimum: 1
+          description: Polling interval in seconds.
+        timeoutSeconds:
+          type: integer
+          minimum: 1
+          description: Timeout for each HTTP request in seconds.
+        successThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive successes required to mark healthy.
+        failureThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive failures required to mark unhealthy.
+        http:
+          $ref: '#/components/schemas/HTTPStatusCheckSpec'
+    StatusCheckTemplate:
+      type: object
+      description: A status check template for use in workflow status check nodes.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    StatusCheckTemplateBase:
+      type: object
+      description: Base summary of a status check template.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace of the template.
+        name:
+          type: string
+          description: Name of the status check template.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+externalDocs:
+  description: Chaos Mesh Documentation
+  url: https://chaos-mesh.org/docs/
