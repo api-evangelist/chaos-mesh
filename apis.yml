@@ -14,7 +14,20 @@ tags:
   - Resilience
   - Testing
 type: Index
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+accessModel:
+  pricing: freemium
+  onboarding: self-serve
+  trial: false
+  try_now: true
+  public: false
+  label: Freemium · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/chaos-mesh.png
 access: Open Source
 created: '2025-01-01'
 modified: '2026-05-19'
@@ -27,35 +40,139 @@ description: >-
   with Kubernetes, Argo Workflows, Prometheus, Grafana, and CI/CD pipelines to run experiments safely in staging and
   production environments.
 apis:
-  - aid: chaos-mesh:chaos-mesh-api
-    name: Chaos Mesh API
-    tags:
-      - Chaos Engineering
-      - CRDs
-      - Dashboard
-      - Experiments
-      - Fault Injection
-      - Kubernetes
-      - Workflows
-    humanURL: https://chaos-mesh.org/docs/
-    properties:
-      - url: https://chaos-mesh.org/docs/
-        type: Documentation
-      - type: GettingStarted
-        url: https://chaos-mesh.org/docs/quick-start/
-      - type: GitHubRepository
-        url: https://github.com/chaos-mesh/chaos-mesh
-      - type: OpenAPI
-        url: openapi/chaos-mesh-dashboard-api-openapi.yml
-      - type: JSONSchema
-        url: json-schema/chaos-mesh-experiment-schema.json
-      - type: JSONLD
-        url: json-ld/chaos-mesh-context.jsonld
-    description: >-
-      Chaos Mesh provides Kubernetes Custom Resources and a REST API for orchestrating chaos experiments including
-      network faults, pod failures, IO chaos, stress testing, kernel chaos, DNS chaos, time chaos, JVM chaos, and HTTP
-      request injection. The Chaos Dashboard exposes a REST API for creating, running, scheduling, and observing
-      experiments and multi-step workflows, with RBAC and event auditing.
+- aid: chaos-mesh:chaos-mesh-archives-api
+  name: Chaos Mesh Archives API
+  description: Access archived (completed or deleted) experiments, schedules, and workflows
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Archives
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-archives-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-common-api
+  name: Chaos Mesh Common API
+  description: Utility endpoints for cluster metadata, namespaces, and configuration
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Common
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-common-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-events-api
+  name: Chaos Mesh Events API
+  description: Query chaos experiment events and audit logs
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Events
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-events-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-experiments-api
+  name: Chaos Mesh Experiments API
+  description: Create, manage, pause, and delete chaos experiments
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Experiments
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-experiments-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-schedules-api
+  name: Chaos Mesh Schedules API
+  description: Create and manage scheduled chaos experiments
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Schedules
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-schedules-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-templates-api
+  name: Chaos Mesh Templates API
+  description: Manage reusable status check templates for workflows
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Templates
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-templates-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
+- aid: chaos-mesh:chaos-mesh-workflows-api
+  name: Chaos Mesh Workflows API
+  description: Create and manage chaos engineering workflows with multiple steps
+  humanURL: https://chaos-mesh.org/docs/
+  tags:
+  - Workflows
+  properties:
+  - type: OpenAPI
+    url: openapi/chaos-mesh-workflows-api-openapi.yml
+  - type: Documentation
+    url: https://chaos-mesh.org/docs/
+  - type: GettingStarted
+    url: https://chaos-mesh.org/docs/quick-start/
+  - type: GitHubRepository
+    url: https://github.com/chaos-mesh/chaos-mesh
+  - type: JSONSchema
+    url: json-schema/chaos-mesh-experiment-schema.json
+  - type: JSONLD
+    url: json-ld/chaos-mesh-context.jsonld
 common:
   - type: AgenticAccess
     url: agentic-access/chaos-mesh-agentic-access.yml
