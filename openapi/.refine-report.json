@@ -1,0 +1,26 @@
+{
+  "provider": "chaos-mesh",
+  "sources": [
+    "chaos-mesh-archives-api-openapi.yml",
+    "chaos-mesh-common-api-openapi.yml",
+    "chaos-mesh-events-api-openapi.yml",
+    "chaos-mesh-experiments-api-openapi.yml",
+    "chaos-mesh-schedules-api-openapi.yml",
+    "chaos-mesh-templates-api-openapi.yml",
+    "chaos-mesh-workflows-api-openapi.yml"
+  ],
+  "outputs": [
+    "chaos-mesh-archives-api-openapi.yml",
+    "chaos-mesh-common-api-openapi.yml",
+    "chaos-mesh-events-api-openapi.yml",
+    "chaos-mesh-experiments-api-openapi.yml",
+    "chaos-mesh-schedules-api-openapi.yml",
+    "chaos-mesh-templates-api-openapi.yml",
+    "chaos-mesh-workflows-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}
