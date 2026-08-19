@@ -1,0 +1,123 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Templates API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Templates",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List status check templates",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/templates/statuschecks",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter templates by name."
+              }
+            ]
+          },
+          "docs": "Returns a list of status check templates available for use in workflows. Status checks allow workflows to conditionally proceed based on external HTTP endpoint health checks."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/templates/statuschecks",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new status check template that can be referenced in workflow definitions. The template defines an HTTP endpoint to poll and the criteria for determining success or failure."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name of the status check template."
+              }
+            ]
+          },
+          "docs": "Returns the detailed definition of a specific status check template identified by namespace and name query parameters."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Update a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing status check template. The full template definition must be provided in the request body."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a status check template",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/templates/statuschecks/statuscheck",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name of the status check template to delete."
+              }
+            ]
+          },
+          "docs": "Deletes a status check template identified by namespace and name query parameters."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

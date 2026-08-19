@@ -1,0 +1,357 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Archives",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by experiment name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter by chaos kind."
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Filter events from this timestamp (RFC3339)."
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "Filter events up to this timestamp (RFC3339)."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos experiments. Experiments are archived after they complete their configured duration or are manually deleted. Results can be filtered by namespace, name, kind, and time range."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes archived experiment records from the Chaos Mesh database. This removes historical records only, not live experiments."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived chaos experiment by its UID, including the original experiment spec and metadata."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a specific archived experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived experiment record by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived schedule experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/schedules",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by schedule name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter by chaos kind."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos schedules that have been deleted or completed. Useful for reviewing historical scheduled chaos activity."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/schedules",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes multiple archived schedule records from the database."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived schedule by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an archived schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived schedule record by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get archived workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/workflows",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter by workflow name."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived chaos workflows that have been deleted or completed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete archived workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/workflows",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of archive UIDs to delete."
+              }
+            ]
+          },
+          "docs": "Deletes multiple archived workflow records from the database."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/archives/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived workflow by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an archived workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/archives/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a single archived workflow record by its UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List archived experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/archives",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to filter results by. If omitted, returns results from all namespaces."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name substring to filter results by."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos."
+              }
+            ]
+          },
+          "docs": "Returns a list of archived (completed or deleted) chaos experiments. Archives provide a historical record of past chaos activity. Can be filtered by namespace, name, and kind."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an archived experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the archived experiment."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific archived chaos experiment including its full spec, final status, and all associated events from its lifetime."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an archive record",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/api/archives/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the archived experiment."
+              }
+            ]
+          },
+          "docs": "Permanently removes an archived experiment record from the database. This does not affect any running Kubernetes resources."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

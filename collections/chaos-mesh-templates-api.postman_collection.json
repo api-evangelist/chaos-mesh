@@ -1,0 +1,1095 @@
+{
+  "item": [
+    {
+      "id": "ca588f4e-e338-4330-92b4-f44fd565aba2",
+      "name": "Templates",
+      "description": {
+        "content": "Manage reusable status check templates for workflows",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "e1ddfc26-6577-4f52-b25a-a611b5875e23",
+          "name": "Chaos Mesh List status check templates",
+          "request": {
+            "name": "Chaos Mesh List status check templates",
+            "description": {
+              "content": "Returns a list of status check templates available for use in workflows. Status checks allow workflows to conditionally proceed based on external HTTP endpoint health checks.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "statuschecks"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "namespace",
+                  "value": "<string>",
+                  "description": "Kubernetes namespace to scope the request to."
+                },
+                {
+                  "disabled": false,
+                  "key": "name",
+                  "value": "<string>",
+                  "description": "Filter templates by name."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "77a414c4-5ac5-4f04-ba85-60cc31cb836e",
+              "name": "List of status check templates returned successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "[\n  {\n    \"namespace\": \"string\",\n    \"name\": \"string\",\n    \"created_at\": \"2000-07-11T16:56:53.541Z\"\n  },\n  {\n    \"namespace\": \"string\",\n    \"name\": \"string\",\n    \"created_at\": \"2017-10-03T14:26:33.871Z\"\n  }\n]",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "764afa6d-2abb-4129-b8d5-9acc94c53110",
+              "name": "Bad request — invalid parameters or request body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ebcd9544-6d91-4040-9500-a9d9a2098b9f",
+              "name": "Internal server error.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e9602127-b2ba-40a9-a11f-16d9c0699dcc",
+          "name": "Chaos Mesh Create a status check template",
+          "request": {
+            "name": "Chaos Mesh Create a status check template",
+            "description": {
+              "content": "Creates a new status check template that can be referenced in workflow definitions. The template defines an HTTP endpoint to poll and the criteria for determining success or failure.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "statuschecks"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"<string>\",\n    \"intervalSeconds\": \"<integer>\",\n    \"timeoutSeconds\": \"<integer>\",\n    \"successThreshold\": \"<integer>\",\n    \"failureThreshold\": \"<integer>\",\n    \"http\": {\n      \"url\": \"<uri>\",\n      \"method\": \"<string>\",\n      \"headers\": {\n        \"key_0\": [\n          \"<string>\",\n          \"<string>\"\n        ],\n        \"key_1\": [\n          \"<string>\",\n          \"<string>\"\n        ]\n      },\n      \"body\": \"<string>\",\n      \"criteria\": {\n        \"statusCode\": \"<string>\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "a9919eb5-1286-452f-8df8-ae68d479118c",
+              "name": "Template created successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"namespace\": \"string\",\n  \"name\": \"string\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 9507,\n    \"timeoutSeconds\": 3062,\n    \"successThreshold\": 2342,\n    \"failureThreshold\": 8713,\n    \"http\": {\n      \"url\": \"http://SNUvIaByxcMFkCpcbDfswRIFlHBJiwd.qpgxoY-cMXmgt0eYXcVdRRjlt\",\n      \"method\": \"POST\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d5a7fb04-f840-4f9e-be58-6e6638b5912b",
+              "name": "Bad request — invalid parameters or request body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "63cb6d04-bec3-4fbb-8f45-8cf77a47dbec",
+              "name": "Internal server error.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a5be5638-95d2-4086-8766-22ce6f634ba2",
+          "name": "Chaos Mesh Get a status check template",
+          "request": {
+            "name": "Chaos Mesh Get a status check template",
+            "description": {
+              "content": "Returns the detailed definition of a specific status check template identified by namespace and name query parameters.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "statuschecks",
+                "statuscheck"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "namespace",
+                  "value": "<string>",
+                  "description": "Kubernetes namespace to scope the request to."
+                },
+                {
+                  "disabled": false,
+                  "key": "name",
+                  "value": "<string>",
+                  "description": "(Required) Name of the status check template."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "ca1f8755-78a6-4375-b322-5fd13a8d8bc7",
+              "name": "Status check template returned successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"namespace\": \"string\",\n  \"name\": \"string\",\n  \"created_at\": \"1982-08-11T11:45:36.884Z\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 3238,\n    \"timeoutSeconds\": 9385,\n    \"successThreshold\": 494,\n    \"failureThreshold\": 6800,\n    \"http\": {\n      \"url\": \"http://BTLUTEcpcQGbnhAgjTy.nyrLr.cluPvKUiLFL+WjdyRSlD-PDqYiG+UA1IRdST9rqjeSp,mb7NY3iQ01D8\",\n      \"method\": \"POST\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3b8b61eb-cacc-4dc8-843d-ce717e172aad",
+              "name": "Bad request — invalid parameters or request body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "02878687-4ca1-40a6-afe0-be37976d4236",
+              "name": "Resource not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3c2e4de2-53af-406c-84a1-364410a199d9",
+              "name": "Internal server error.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "2093d5e2-fbbe-4531-9cff-8684cb5b89a7",
+          "name": "Chaos Mesh Update a status check template",
+          "request": {
+            "name": "Chaos Mesh Update a status check template",
+            "description": {
+              "content": "Updates an existing status check template. The full template definition must be provided in the request body.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "statuschecks",
+                "statuscheck"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"<string>\",\n    \"intervalSeconds\": \"<integer>\",\n    \"timeoutSeconds\": \"<integer>\",\n    \"successThreshold\": \"<integer>\",\n    \"failureThreshold\": \"<integer>\",\n    \"http\": {\n      \"url\": \"<uri>\",\n      \"method\": \"<string>\",\n      \"headers\": {\n        \"key_0\": [\n          \"<string>\",\n          \"<string>\"\n        ],\n        \"key_1\": [\n          \"<string>\",\n          \"<string>\"\n        ]\n      },\n      \"body\": \"<string>\",\n      \"criteria\": {\n        \"statusCode\": \"<string>\"\n      }\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "654b5ec9-abc8-41ee-ab4d-d4fbd10df5f7",
+              "name": "Template updated successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"namespace\": \"string\",\n  \"name\": \"string\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 9507,\n    \"timeoutSeconds\": 3062,\n    \"successThreshold\": 2342,\n    \"failureThreshold\": 8713,\n    \"http\": {\n      \"url\": \"http://SNUvIaByxcMFkCpcbDfswRIFlHBJiwd.qpgxoY-cMXmgt0eYXcVdRRjlt\",\n      \"method\": \"POST\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5593fd3c-ea01-44f1-be76-b3f1025b251f",
+              "name": "Bad request — invalid parameters or request body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5e8f3801-d088-4992-9980-4f166ac4e227",
+              "name": "Resource not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5d6ec221-a56d-479c-bee6-e6533b0c5743",
+              "name": "Internal server error.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "PUT",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"namespace\": \"<string>\",\n  \"name\": \"<string>\",\n  \"spec\": {\n    \"type\": \"HTTP\",\n    \"intervalSeconds\": 6848,\n    \"timeoutSeconds\": 5449,\n    \"successThreshold\": 7304,\n    \"failureThreshold\": 4349,\n    \"http\": {\n      \"url\": \"http://YBBXNkeKzmCizG.lregdtbIA+3ISecDqHri8WmhtIVXAU3EZ9Hi6mslXjuzYbb-J7+wikjj532dApyC+LcL73\",\n      \"method\": \"GET\",\n      \"headers\": {\n        \"key_0\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_1\": [\n          \"string\",\n          \"string\"\n        ],\n        \"key_2\": [\n          \"string\",\n          \"string\"\n        ]\n      },\n      \"body\": \"string\",\n      \"criteria\": {\n        \"statusCode\": \"string\"\n      }\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "0a4ca531-02c2-4db3-821b-5e64c9e3b7a9",
+          "name": "Chaos Mesh Delete a status check template",
+          "request": {
+            "name": "Chaos Mesh Delete a status check template",
+            "description": {
+              "content": "Deletes a status check template identified by namespace and name query parameters.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "templates",
+                "statuschecks",
+                "statuscheck"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "key": "namespace",
+                  "value": "<string>",
+                  "description": "Kubernetes namespace to scope the request to."
+                },
+                {
+                  "disabled": false,
+                  "key": "name",
+                  "value": "<string>",
+                  "description": "(Required) Name of the status check template to delete."
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "0d8cd290-9f19-45f1-84e3-fcf77adcc69e",
+              "name": "Template deleted successfully.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1636a6b4-7fde-48ba-8cf7-30fcebf3c57f",
+              "name": "Bad request — invalid parameters or request body.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8c323fc5-4efc-4e85-b578-da84fa47d34a",
+              "name": "Resource not found.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6f9b0ccb-c347-4d65-ad19-47b2f086e640",
+              "name": "Internal server error.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "templates",
+                    "statuschecks",
+                    "statuscheck"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "namespace",
+                      "value": "<string>"
+                    },
+                    {
+                      "key": "name",
+                      "value": "<string>"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"code\": 7172,\n  \"message\": \"string\",\n  \"full_text\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "http://localhost:2333/api",
+      "key": "baseUrl"
+    }
+  ],
+  "info": {
+    "_postman_id": "d4740230-b7a8-4a77-b0ab-0fccf0955394",
+    "name": "Chaos Mesh Dashboard Archives Templates API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.\n\nContact Support:\n Name: Chaos Mesh Community",
+      "type": "text/plain"
+    }
+  }
+}

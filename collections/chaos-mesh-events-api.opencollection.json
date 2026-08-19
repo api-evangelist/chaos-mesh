@@ -1,0 +1,154 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Events API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Events",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events",
+            "params": [
+              {
+                "name": "object_id",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by the UID of the associated experiment or workflow."
+              },
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by experiment name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter events by chaos kind."
+              },
+              {
+                "name": "start",
+                "value": "",
+                "type": "query",
+                "description": "Filter events from this timestamp (RFC3339)."
+              },
+              {
+                "name": "end",
+                "value": "",
+                "type": "query",
+                "description": "Filter events up to this timestamp (RFC3339)."
+              },
+              {
+                "name": "limit",
+                "value": "",
+                "type": "query",
+                "description": "Maximum number of events to return."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiment events from the Chaos Mesh event store. Events record state transitions and fault injection activities. Results can be filtered by object UID, namespace, name, kind, and time range."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an event",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events/:id",
+            "params": [
+              {
+                "name": "id",
+                "value": "",
+                "type": "path",
+                "description": "Integer ID of the event."
+              }
+            ]
+          },
+          "docs": "Returns a specific chaos event by its integer ID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List events for a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/events/workflow/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns all events associated with a specific workflow and its related child experiments by the workflow UID."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List events",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/events",
+            "params": [
+              {
+                "name": "objectId",
+                "value": "",
+                "type": "query",
+                "description": "UID of the object (experiment, workflow, or schedule) to filter events by."
+              },
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to filter results by. If omitted, returns results from all namespaces."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name substring to filter results by."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos."
+              },
+              {
+                "name": "type",
+                "value": "",
+                "type": "query",
+                "description": "Event type filter, e.g., Normal or Warning."
+              }
+            ]
+          },
+          "docs": "Returns a list of events generated by chaos experiments, workflows, and schedules. Events capture state transitions, errors, and lifecycle changes. Can be filtered by object ID, namespace, name, kind, and type."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

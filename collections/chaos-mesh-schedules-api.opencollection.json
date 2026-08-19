@@ -1,0 +1,299 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Schedules API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Schedules",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/schedules",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by name."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by chaos kind."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter schedules by status."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos schedules from the Kubernetes cluster. Schedules define recurring chaos experiments using cron expressions. Results can be filtered by namespace, name, and kind."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/schedules",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos schedule that runs a chaos experiment on a recurring cron schedule. The request body is a Chaos Mesh Schedule custom resource which wraps a chaos experiment spec with scheduling parameters including the cron expression, history limit, and concurrency policy."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Batch delete schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/schedules",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of schedule UIDs to delete."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete schedules without graceful cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes multiple chaos schedules in a single request using a comma-separated list of UIDs."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos schedule identified by its UID, including its cron expression, experiment template, and execution history."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete without graceful cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos schedule by its UID. The schedule and all its associated Kubernetes resources are removed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/schedules/pause/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Pauses a chaos schedule by its UID, preventing future scheduled runs from executing. Currently running experiments triggered by the schedule are not affected."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/schedules/start/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos schedule by its UID, allowing future cron-triggered runs to execute again."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List schedules",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/schedules",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to filter results by. If omitted, returns results from all namespaces."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name substring to filter results by."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status to filter experiments or schedules by."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiment schedules. Schedules use cron expressions to trigger chaos experiments automatically at configured intervals. Results can be filtered by namespace, name, and status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/api/schedules",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos experiment schedule. The schedule wraps a chaos experiment spec with a cron expression and optional history limits. The chaos experiment is instantiated automatically each time the schedule fires."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the schedule."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos schedule including its cron expression, embedded chaos spec, and history of triggered experiment instances."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/api/schedules/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the schedule."
+              }
+            ]
+          },
+          "docs": "Deletes a chaos experiment schedule. No further experiment instances will be created. Running experiments triggered by the schedule are not affected."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/api/schedules/:uid/pause",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the schedule."
+              }
+            ]
+          },
+          "docs": "Pauses a chaos schedule so that no new experiment instances are created while the schedule is suspended. Existing running experiments are not affected."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start (resume) a schedule",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/api/schedules/:uid/start",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the schedule."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos schedule so that new experiment instances are created again on the configured cron schedule."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

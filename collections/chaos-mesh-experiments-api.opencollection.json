@@ -1,0 +1,330 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Experiments API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Experiments",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by name (partial match supported)."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by chaos kind (e.g., PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos)."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter experiments by status (e.g., running, paused, finished)."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiments from the Kubernetes cluster. Results can be filtered by namespace, name, kind of chaos, and status. Each experiment entry includes its UID, name, namespace, kind, creation time, and current status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/experiments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos experiment in the Kubernetes cluster by submitting a chaos custom resource definition. The request body should contain a valid Chaos Mesh custom resource object such as PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, or other supported chaos kinds. The experiment begins injecting faults immediately upon creation."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Batch delete chaos experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/experiments",
+            "params": [
+              {
+                "name": "uids",
+                "value": "",
+                "type": "query",
+                "description": "Comma-separated list of experiment UIDs to delete."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete experiments without waiting for fault cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes multiple chaos experiments in a single request. Experiment UIDs to be deleted are specified as a comma-separated list in the uids query parameter. Force deletion bypasses graceful cleanup of injected faults."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos experiment identified by its UID. The response includes the full experiment spec, current status, and associated Kubernetes resource details."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "Force delete without waiting for fault cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos experiment by its UID. The experiment and its associated Kubernetes custom resource are removed. In-progress fault injections are terminated during cleanup."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/experiments/pause/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Pauses a running chaos experiment by its UID. When paused, fault injection is suspended but the experiment resource is retained. The experiment can be resumed with the start endpoint."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start a chaos experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/experiments/start/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos experiment by its UID. Once started, fault injection resumes according to the experiment spec. This endpoint is used to unpause experiments that were previously paused."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get the status of all experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/experiments/state",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a summary of experiment counts grouped by status across the cluster. Useful for dashboard overview displays showing how many experiments are running, paused, stopped, or finished."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List experiments",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/experiments",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to filter results by. If omitted, returns results from all namespaces."
+              },
+              {
+                "name": "kind",
+                "value": "",
+                "type": "query",
+                "description": "Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name substring to filter results by."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status to filter experiments or schedules by."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos experiments across all or a filtered set of namespaces. Results can be filtered by namespace, kind (chaos type), name substring, and status. Each experiment entry includes the chaos type, namespace, name, current status, and creation timestamp."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create an experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/api/experiments",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos experiment by submitting a Chaos Mesh custom resource to Kubernetes. The request body must include the kind field specifying the chaos type (e.g., PodChaos, NetworkChaos) and a spec field with the chaos-type-specific configuration. The experiment begins immediately upon creation unless a duration or schedule is specified."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get an experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the chaos experiment."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos experiment identified by its UID. The response includes the full experiment specification, current status, affected pods, and event history."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete an experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/api/experiments/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the chaos experiment."
+              },
+              {
+                "name": "force",
+                "value": "",
+                "type": "query",
+                "description": "When true, force-deletes the experiment without waiting for cleanup."
+              }
+            ]
+          },
+          "docs": "Deletes a chaos experiment and stops the ongoing fault injection. When force is true, the experiment is deleted immediately without waiting for graceful cleanup. The deleted experiment is moved to the archives."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Pause an experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/api/experiments/:uid/pause",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the chaos experiment."
+              }
+            ]
+          },
+          "docs": "Pauses a running chaos experiment, stopping fault injection without deleting the experiment resource. The experiment can be resumed by calling the start endpoint. Useful for temporarily halting chaos during incident response."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Start (resume) an experiment",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/api/experiments/:uid/start",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the chaos experiment."
+              }
+            ]
+          },
+          "docs": "Resumes a paused chaos experiment, reinstating fault injection. Can also be used to start an experiment that was created in a paused state."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,187 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Common API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Common",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh Get Dashboard configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/config"
+          },
+          "docs": "Returns the current configuration of the Chaos Mesh Dashboard including security settings, namespace scope, and feature flags."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get all Kubernetes namespaces",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/namespaces"
+          },
+          "docs": "Returns a list of all namespace names from the Kubernetes cluster. Used by the UI for namespace selection dropdowns when scoping experiments."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get namespaces available for chaos injection",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/chaos-available-namespaces"
+          },
+          "docs": "Returns the list of namespaces where chaos can be injected based on Chaos Mesh RBAC configuration and namespace scope settings."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get all available chaos kinds",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/kinds"
+          },
+          "docs": "Returns a list of all chaos experiment kinds available in the current Kubernetes cluster based on installed CRDs. Examples include PodChaos, NetworkChaos, IOChaos, StressChaos, TimeChaos, HTTPChaos, and cloud provider chaos types."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get pod labels",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/labels",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a map of label keys to their possible values for pods in the specified namespace. Used by the UI to build label selector inputs for targeting experiments at specific pods."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get pod annotations",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/annotations",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              }
+            ]
+          },
+          "docs": "Returns a map of annotation keys to their possible values for pods in the specified namespace."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List pods matching a selector",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/common/pods",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns pods from the Kubernetes cluster that match the provided label selector. Used by the UI to preview which pods would be targeted by an experiment before creating it."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List physical machines matching a selector",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/common/physicalmachines",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns PhysicalMachine resources from the Kubernetes cluster that match the provided selector. Physical machines are used for chaos experiments targeting bare-metal or VM hosts via the chaos-daemon."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get RBAC configuration",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/common/rbac-config",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "role",
+                "value": "",
+                "type": "query",
+                "description": "Role type to generate RBAC config for (manager or viewer)."
+              },
+              {
+                "name": "scope",
+                "value": "",
+                "type": "query",
+                "description": "Scope of the RBAC config (cluster or namespace)."
+              }
+            ]
+          },
+          "docs": "Returns the RBAC configuration guidance for setting up Chaos Mesh permissions. This endpoint helps users understand what RBAC roles and bindings are needed to run chaos experiments in their chosen namespace with their chosen scope."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List namespaces",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/common/namespaces"
+          },
+          "docs": "Returns the list of Kubernetes namespaces available for targeting chaos experiments. Used to populate namespace selectors in the Chaos Dashboard UI."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List pods for a selector",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/api/common/pods",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Returns a list of pods matching the given label selectors and namespaces. Used to preview which pods will be affected by a chaos experiment before creating it, so operators can verify their target selector."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

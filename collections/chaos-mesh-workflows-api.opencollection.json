@@ -1,0 +1,277 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Chaos Mesh Dashboard Archives Workflows API",
+    "version": "2.5"
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Workflows",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Chaos Mesh List workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/workflows",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to scope the request to."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Filter workflows by name."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Filter workflows by status."
+              }
+            ]
+          },
+          "docs": "Returns a list of chaos engineering workflows from the Kubernetes cluster. Workflows allow orchestrating multiple chaos experiments as a sequence of steps with parallel execution, conditional branching, and timing controls. Results can be filtered by namespace, name, and status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a new workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new chaos engineering workflow in the Kubernetes cluster. The request body is a Chaos Mesh Workflow custom resource that defines the entry point and sequence of chaos steps to execute, including serial and parallel task groups, suspends, and HTTP tasks."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get workflow details",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific chaos workflow identified by its UID. The response includes the workflow topology, node states, and execution progress of each step."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Update a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing chaos workflow with a new definition. The workflow spec is replaced with the provided Kubernetes object description."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "UUID of the chaos resource."
+              }
+            ]
+          },
+          "docs": "Deletes a specific chaos workflow by its UID. The workflow and all its associated Kubernetes resources are removed."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Parse an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/parse-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Parses a rendered HTTP workflow task template back to the original request form. Used by the UI to convert between internal representations and editable form data for HTTP tasks in workflows."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Render an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/render-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Renders an HTTP workflow task from a request form into the final template format used in workflow definitions. This converts the UI form submission into the internal Template representation."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Validate an HTTP workflow task",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/workflows/validate-task/http",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Validates that a given rendered Template is a valid HTTP task. Returns true if the template is valid, false or an error if it is not."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh List workflows",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/workflows",
+            "params": [
+              {
+                "name": "namespace",
+                "value": "",
+                "type": "query",
+                "description": "Kubernetes namespace to filter results by. If omitted, returns results from all namespaces."
+              },
+              {
+                "name": "name",
+                "value": "",
+                "type": "query",
+                "description": "Name substring to filter results by."
+              },
+              {
+                "name": "status",
+                "value": "",
+                "type": "query",
+                "description": "Status to filter experiments or schedules by."
+              }
+            ]
+          },
+          "docs": "Returns a list of Chaos Mesh workflows. Workflows allow orchestrating multiple chaos experiments in serial or parallel sequences. Results can be filtered by namespace, name, and status."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Create a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "http://localhost:2333/api/api/workflows",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Creates a new Chaos Mesh workflow for orchestrating multiple chaos experiments. The workflow spec defines a directed acyclic graph of tasks that can run in serial, parallel, or with suspend steps. Each task can reference a chaos template or be a sub-workflow."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Get a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "http://localhost:2333/api/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the workflow."
+              }
+            ]
+          },
+          "docs": "Returns detailed information about a specific workflow including its current execution state, the status of each task node, and associated event history."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Update a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "PUT",
+            "url": "http://localhost:2333/api/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the workflow."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Updates an existing workflow definition. The updated spec replaces the existing workflow configuration. Running workflow nodes are not interrupted; changes take effect on future executions."
+        },
+        {
+          "info": {
+            "name": "Chaos Mesh Delete a workflow",
+            "type": "http"
+          },
+          "http": {
+            "method": "DELETE",
+            "url": "http://localhost:2333/api/api/workflows/:uid",
+            "params": [
+              {
+                "name": "uid",
+                "value": "",
+                "type": "path",
+                "description": "Unique identifier (UUID) of the workflow."
+              }
+            ]
+          },
+          "docs": "Deletes a Chaos Mesh workflow and stops any running chaos tasks within it. The deleted workflow is moved to the archives."
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}
