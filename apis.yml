@@ -4,6 +4,17 @@ name: Chaos Mesh
 kind: opensource
 tags:
   - Chaos Engineering
+  - Cloud-Native
+  - CNCF
+  - Fault Injection
+  - Kubernetes
+  - Observability
+  - Open-Source
+  - Reliability
+  - Resilience
+  - Testing
+tags_raw:
+  - Chaos Engineering
   - Cloud Native
   - CNCF
   - Fault Injection
@@ -83,6 +94,8 @@ apis:
   description: Query chaos experiment events and audit logs
   humanURL: https://chaos-mesh.org/docs/
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
