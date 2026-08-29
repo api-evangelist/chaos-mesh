@@ -1,17 +1,26 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Chaos Mesh Dashboard Archives Events API
-  description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
-  version: '2.5'
+  title: Chaos Mesh Events API
   contact:
     name: Chaos Mesh Community
     url: https://chaos-mesh.org/community/
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
+  version: '1.0'
+  description: 'Operations tagged Events across 2 of this provider''s published API definitions: chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml. Each path carries the servers of the definition it was published in.'
 servers:
 - url: http://localhost:2333/api
   description: Default Chaos Mesh Dashboard server
+- url: http://{dashboardHost}:{dashboardPort}
+  description: Chaos Mesh Dashboard API server
+  variables:
+    dashboardHost:
+      default: chaos-dashboard.chaos-testing
+      description: Hostname or service name for the Chaos Mesh Dashboard.
+    dashboardPort:
+      default: '2333'
+      description: Port on which the Chaos Mesh Dashboard API listens.
 tags:
 - name: Events
   description: Query chaos experiment events and audit logs
@@ -79,6 +88,9 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    servers:
+    - url: http://localhost:2333/api
+      description: Default Chaos Mesh Dashboard server
   /events/{id}:
     get:
       operationId: getEvent
@@ -106,6 +118,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    servers:
+    - url: http://localhost:2333/api
+      description: Default Chaos Mesh Dashboard server
   /events/workflow/{uid}:
     get:
       operationId: listWorkflowEvents
@@ -130,6 +145,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    servers:
+    - url: http://localhost:2333/api
+      description: Default Chaos Mesh Dashboard server
   /api/events:
     get:
       operationId: listEvents
@@ -167,57 +185,102 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
+      security:
+      - bearerAuth: []
+    servers:
+    - url: http://{dashboardHost}:{dashboardPort}
+      description: Chaos Mesh Dashboard API server
+      variables:
+        dashboardHost:
+          default: chaos-dashboard.chaos-testing
+          description: Hostname or service name for the Chaos Mesh Dashboard.
+        dashboardPort:
+          default: '2333'
+          description: Port on which the Chaos Mesh Dashboard API listens.
 components:
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    KindQuery:
+      name: kind
+      in: query
+      required: false
+      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
+      schema:
+        type: string
+        enum:
+        - PodChaos
+        - NetworkChaos
+        - IOChaos
+        - StressChaos
+        - HTTPChaos
+        - TimeChaos
+        - DNSChaos
+        - KernelChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - PhysicalMachineChaos
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
-    Event_2:
-      type: object
-      description: An event record capturing a state transition or notable occurrence in the lifecycle of a chaos experiment, workflow, or schedule.
-      properties:
-        id:
-          type: integer
-          description: Auto-incremented database ID for the event.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the event was recorded.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource that generated the event.
-        name:
-          type: string
-          description: Name of the resource that generated the event.
-        kind:
-          type: string
-          description: Resource kind that generated the event.
-        type:
-          type: string
-          description: Event type, such as Normal or Warning.
-          enum:
-          - Normal
-          - Warning
-        reason:
-          type: string
-          description: Machine-readable reason code for the event.
-          example: Updated
-        message:
-          type: string
-          description: Human-readable message describing what happened.
-        object_id:
-          type: string
-          format: uuid
-          description: UID of the experiment, workflow, or schedule that generated the event.
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
     Event:
       type: object
       description: A chaos experiment event recording a state transition or fault injection activity.
@@ -264,88 +327,63 @@ components:
         full_text:
           type: string
           description: Full error text including stack trace or detailed cause.
-  responses:
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-  parameters:
-    uidParam:
-      name: uid
-      in: path
-      description: UUID of the chaos resource.
-      required: true
-      schema:
-        type: string
-        format: uuid
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
-    KindQuery:
-      name: kind
-      in: query
-      required: false
-      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
-      schema:
-        type: string
-        enum:
-        - PodChaos
-        - NetworkChaos
-        - IOChaos
-        - StressChaos
-        - HTTPChaos
-        - TimeChaos
-        - DNSChaos
-        - KernelChaos
-        - AWSChaos
-        - GCPChaos
-        - JVMChaos
-        - PhysicalMachineChaos
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
-    NamespaceQuery:
-      name: namespace
-      in: query
-      required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
-      schema:
-        type: string
-        example: default
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    Event_2:
+      type: object
+      description: An event record capturing a state transition or notable occurrence in the lifecycle of a chaos experiment, workflow, or schedule.
+      properties:
+        id:
+          type: integer
+          description: Auto-incremented database ID for the event.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the event was recorded.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource that generated the event.
+        name:
+          type: string
+          description: Name of the resource that generated the event.
+        kind:
+          type: string
+          description: Resource kind that generated the event.
+        type:
+          type: string
+          description: Event type, such as Normal or Warning.
+          enum:
+          - Normal
+          - Warning
+        reason:
+          type: string
+          description: Machine-readable reason code for the event.
+          example: Updated
+        message:
+          type: string
+          description: Human-readable message describing what happened.
+        object_id:
+          type: string
+          format: uuid
+          description: UID of the experiment, workflow, or schedule that generated the event.
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token for authenticating API requests. Typically a Kubernetes service account token with RBAC permissions to read/write Chaos Mesh custom resources in the target namespaces.
 externalDocs:
   description: Chaos Mesh Documentation
   url: https://chaos-mesh.org/docs/
+x-refined-from:
+- chaos-mesh-dashboard-api-openapi.yml
+- chaos-mesh-dashboard-openapi.yml

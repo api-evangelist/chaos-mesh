@@ -1,13 +1,8 @@
 {
   "provider": "chaos-mesh",
   "sources": [
-    "chaos-mesh-archives-api-openapi.yml",
-    "chaos-mesh-common-api-openapi.yml",
-    "chaos-mesh-events-api-openapi.yml",
-    "chaos-mesh-experiments-api-openapi.yml",
-    "chaos-mesh-schedules-api-openapi.yml",
-    "chaos-mesh-templates-api-openapi.yml",
-    "chaos-mesh-workflows-api-openapi.yml"
+    "_original/chaos-mesh-dashboard-api-openapi.yml",
+    "_original/chaos-mesh-dashboard-openapi.yml"
   ],
   "outputs": [
     "chaos-mesh-archives-api-openapi.yml",
@@ -21,6 +16,24 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (2 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "chaos-mesh-dashboard-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "chaos-mesh-dashboard-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tag 'Archives' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "tag 'Common' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "tag 'Events' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "tag 'Experiments' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "tag 'Schedules' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "tag 'Workflows' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied"
+  ],
+  "skipped": [
+    "chaos-mesh-archives-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-common-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-experiments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-schedules-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-templates-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "chaos-mesh-workflows-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

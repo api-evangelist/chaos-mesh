@@ -1,6 +1,6 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
-  title: Chaos Mesh Dashboard Archives Templates API
+  title: Chaos Mesh Dashboard Templates API
   description: The Chaos Mesh Dashboard API provides REST endpoints for managing chaos experiments, schedules, workflows, and events on Kubernetes clusters. Chaos Mesh is a cloud-native chaos engineering platform that supports fault injection into pods, nodes, networks, IO subsystems, and cloud provider resources. The Dashboard API is served by the chaos-dashboard component and is the backend for the Chaos Mesh web UI, accessible at /api on the dashboard server.
   version: '2.5'
   contact:
@@ -150,59 +150,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
-  responses:
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
   schemas:
-    HTTPStatusCheckSpec:
-      type: object
-      description: HTTP-specific configuration for a status check.
-      properties:
-        url:
-          type: string
-          format: uri
-          description: URL to poll for the health check.
-        method:
-          type: string
-          enum:
-          - GET
-          - POST
-          description: HTTP method to use.
-        headers:
-          type: object
-          description: HTTP headers to include in the request.
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        body:
-          type: string
-          description: Request body for POST requests.
-        criteria:
-          $ref: '#/components/schemas/HTTPCriteria'
-    HTTPCriteria:
-      type: object
-      description: Criteria for determining a successful status check response.
-      properties:
-        statusCode:
-          type: string
-          description: Expected HTTP status code or range (e.g., "200" or "200-299").
     StatusCheckSpec:
       type: object
       description: Specification for a status check that polls an HTTP endpoint.
@@ -230,18 +178,32 @@ components:
           description: Number of consecutive failures required to mark unhealthy.
         http:
           $ref: '#/components/schemas/HTTPStatusCheckSpec'
-    StatusCheckTemplate:
+    HTTPStatusCheckSpec:
       type: object
-      description: A status check template for use in workflow status check nodes.
+      description: HTTP-specific configuration for a status check.
       properties:
-        namespace:
+        url:
           type: string
-          description: Kubernetes namespace.
-        name:
+          format: uri
+          description: URL to poll for the health check.
+        method:
           type: string
-          description: Template name.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
+          enum:
+          - GET
+          - POST
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        body:
+          type: string
+          description: Request body for POST requests.
+        criteria:
+          $ref: '#/components/schemas/HTTPCriteria'
     StatusCheckTemplateDetail:
       type: object
       description: Detailed status check template with full spec.
@@ -265,6 +227,39 @@ components:
         status:
           type: string
           description: Status of the operation (e.g., success).
+    StatusCheckTemplate:
+      type: object
+      description: A status check template for use in workflow status check nodes.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckTemplateBase:
+      type: object
+      description: Base summary of a status check template.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace of the template.
+        name:
+          type: string
+          description: Name of the status check template.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+    HTTPCriteria:
+      type: object
+      description: Criteria for determining a successful status check response.
+      properties:
+        statusCode:
+          type: string
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
     APIError:
       type: object
       description: Error response returned when an API request fails.
@@ -281,20 +276,6 @@ components:
         full_text:
           type: string
           description: Full error text including stack trace or detailed cause.
-    StatusCheckTemplateBase:
-      type: object
-      description: Base summary of a status check template.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace of the template.
-        name:
-          type: string
-          description: Name of the status check template.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
   parameters:
     namespaceParam:
       name: namespace
@@ -303,6 +284,25 @@ components:
       required: false
       schema:
         type: string
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
 externalDocs:
   description: Chaos Mesh Documentation
   url: https://chaos-mesh.org/docs/
