@@ -44,17 +44,18 @@ accessModel:
   try_now: true
   public: false
   label: Freemium · Self-serve signup
-  confidence: high
+  confidence: medium
   source:
   - plans
   - authentication
-  generated: '2026-07-22'
+  - security
+  generated: '2026-09-03'
   method: derived
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/chaos-mesh.png
 access: Open Source
 created: '2025-01-01'
 modified: '2026-05-19'
-position: Consumer
+position: Consuming
 description: >-
   Chaos Mesh is a CNCF graduated cloud-native chaos engineering platform that orchestrates chaos experiments on
   Kubernetes to test system resilience and reliability. It exposes Kubernetes Custom Resource Definitions (CRDs) for a
