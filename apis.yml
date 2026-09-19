@@ -147,6 +147,8 @@ apis:
   description: Create and manage scheduled chaos experiments
   humanURL: https://chaos-mesh.org/docs/
   tags:
+  - Schedule
+  tags_raw:
   - Schedules
   properties:
   - type: OpenAPI
