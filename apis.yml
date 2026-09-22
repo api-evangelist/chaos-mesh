@@ -2,6 +2,9 @@ aid: chaos-mesh
 url: https://raw.githubusercontent.com/api-evangelist/chaos-mesh/refs/heads/main/apis.yml
 name: Chaos Mesh
 kind: opensource
+x-docs-platform: docusaurus
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-21
 tags:
   - Chaos Engineering
   - Cloud-Native
