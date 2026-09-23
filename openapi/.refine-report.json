@@ -25,7 +25,8 @@
     "tag 'Events' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
     "tag 'Experiments' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
     "tag 'Schedules' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
-    "tag 'Workflows' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied"
+    "tag 'Workflows' spans 2 source specs (chaos-mesh-dashboard-api-openapi.yml, chaos-mesh-dashboard-openapi.yml): per-path servers applied",
+    "apis.yml register: already-registered"
   ],
   "skipped": [
     "chaos-mesh-archives-api-openapi.yml: previously refined output, superseded by openapi/_original/",

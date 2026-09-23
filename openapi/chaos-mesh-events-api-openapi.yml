@@ -198,89 +198,23 @@ paths:
           default: '2333'
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
-  parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
-    uidParam:
-      name: uid
-      in: path
-      description: UUID of the chaos resource.
-      required: true
-      schema:
-        type: string
-        format: uuid
-    NamespaceQuery:
-      name: namespace
-      in: query
-      required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
-      schema:
-        type: string
-        example: default
-    KindQuery:
-      name: kind
-      in: query
-      required: false
-      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
-      schema:
-        type: string
-        enum:
-        - PodChaos
-        - NetworkChaos
-        - IOChaos
-        - StressChaos
-        - HTTPChaos
-        - TimeChaos
-        - DNSChaos
-        - KernelChaos
-        - AWSChaos
-        - GCPChaos
-        - JVMChaos
-        - PhysicalMachineChaos
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
-  responses:
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   schemas:
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
     Event:
       type: object
       description: A chaos experiment event recording a state transition or fault injection activity.
@@ -311,22 +245,6 @@ components:
         message:
           type: string
           description: Human-readable message describing the event.
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
     ErrorResponse:
       type: object
       description: Error response returned when an API operation fails.
@@ -376,6 +294,88 @@ components:
           type: string
           format: uuid
           description: UID of the experiment, workflow, or schedule that generated the event.
+  parameters:
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    KindQuery:
+      name: kind
+      in: query
+      required: false
+      description: Chaos type kind to filter by, such as PodChaos, NetworkChaos, IOChaos, StressChaos, HTTPChaos, TimeChaos, DNSChaos, or KernelChaos.
+      schema:
+        type: string
+        enum:
+        - PodChaos
+        - NetworkChaos
+        - IOChaos
+        - StressChaos
+        - HTTPChaos
+        - TimeChaos
+        - DNSChaos
+        - KernelChaos
+        - AWSChaos
+        - GCPChaos
+        - JVMChaos
+        - PhysicalMachineChaos
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+  responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http

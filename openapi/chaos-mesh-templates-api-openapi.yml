@@ -151,6 +151,104 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    HTTPStatusCheckSpec:
+      type: object
+      description: HTTP-specific configuration for a status check.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to poll for the health check.
+        method:
+          type: string
+          enum:
+          - GET
+          - POST
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        body:
+          type: string
+          description: Request body for POST requests.
+        criteria:
+          $ref: '#/components/schemas/HTTPCriteria'
+    StatusCheckTemplateBase:
+      type: object
+      description: Base summary of a status check template.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace of the template.
+        name:
+          type: string
+          description: Name of the status check template.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    HTTPCriteria:
+      type: object
+      description: Criteria for determining a successful status check response.
+      properties:
+        statusCode:
+          type: string
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
+    StatusCheckTemplate:
+      type: object
+      description: A status check template for use in workflow status check nodes.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
     StatusCheckSpec:
       type: object
       description: Specification for a status check that polls an HTTP endpoint.
@@ -178,113 +276,13 @@ components:
           description: Number of consecutive failures required to mark unhealthy.
         http:
           $ref: '#/components/schemas/HTTPStatusCheckSpec'
-    HTTPStatusCheckSpec:
-      type: object
-      description: HTTP-specific configuration for a status check.
-      properties:
-        url:
-          type: string
-          format: uri
-          description: URL to poll for the health check.
-        method:
-          type: string
-          enum:
-          - GET
-          - POST
-          description: HTTP method to use.
-        headers:
-          type: object
-          description: HTTP headers to include in the request.
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        body:
-          type: string
-          description: Request body for POST requests.
-        criteria:
-          $ref: '#/components/schemas/HTTPCriteria'
-    StatusCheckTemplateDetail:
-      type: object
-      description: Detailed status check template with full spec.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace.
-        name:
-          type: string
-          description: Template name.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
-    StatusResponse:
-      type: object
-      description: Generic status response for operations that do not return a resource.
-      properties:
-        status:
-          type: string
-          description: Status of the operation (e.g., success).
-    StatusCheckTemplate:
-      type: object
-      description: A status check template for use in workflow status check nodes.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace.
-        name:
-          type: string
-          description: Template name.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
-    StatusCheckTemplateBase:
-      type: object
-      description: Base summary of a status check template.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace of the template.
-        name:
-          type: string
-          description: Name of the status check template.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
-    HTTPCriteria:
-      type: object
-      description: Criteria for determining a successful status check response.
-      properties:
-        statusCode:
-          type: string
-          description: Expected HTTP status code or range (e.g., "200" or "200-299").
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
-  parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
   responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
     NotFound:
       description: Resource not found.
       content:
@@ -297,12 +295,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
 externalDocs:
   description: Chaos Mesh Documentation
   url: https://chaos-mesh.org/docs/

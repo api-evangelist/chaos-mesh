@@ -421,25 +421,44 @@ components:
         timeout:
           type: string
           description: Request timeout duration.
-    Topology:
+    Node:
       type: object
-      description: Workflow execution topology showing nodes and their states.
+      description: A node in the workflow topology representing a single execution step.
       properties:
-        nodes:
-          type: array
-          description: List of workflow nodes representing individual steps.
-          items:
-            $ref: '#/components/schemas/Node'
-    ConditionalBranch:
+        name:
+          type: string
+          description: Name of the workflow node.
+        uid:
+          type: string
+          description: UID of the workflow node.
+        type:
+          type: string
+          description: Type of workflow node (e.g., ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode).
+        state:
+          type: string
+          description: Execution state of the node (e.g., Running, Succeeded, Failed, Pending).
+        template:
+          type: string
+          description: Template name this node is executing.
+        serial:
+          type: boolean
+          description: Whether this node is executing in serial order.
+    APIError:
       type: object
-      description: A conditional branch in a workflow that executes based on an expression.
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
       properties:
-        target:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
           type: string
-          description: Name of the template to execute if the condition is true.
-        expression:
+          description: Human-readable description of the error.
+        full_text:
           type: string
-          description: Boolean expression that determines whether to take this branch.
+          description: Full error text including stack trace or detailed cause.
     WorkflowDetail:
       type: object
       description: Detailed information about a chaos workflow including node topology.
@@ -472,28 +491,48 @@ components:
           $ref: '#/components/schemas/Topology'
         kube_object:
           $ref: '#/components/schemas/KubeObjectDesc'
-    Node:
+    StatusResponse:
       type: object
-      description: A node in the workflow topology representing a single execution step.
+      description: Generic status response for operations that do not return a resource.
       properties:
-        name:
+        status:
           type: string
-          description: Name of the workflow node.
-        uid:
+          description: Status of the operation (e.g., success).
+    Topology:
+      type: object
+      description: Workflow execution topology showing nodes and their states.
+      properties:
+        nodes:
+          type: array
+          description: List of workflow nodes representing individual steps.
+          items:
+            $ref: '#/components/schemas/Node'
+    KubeObjectDesc:
+      type: object
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      properties:
+        apiVersion:
           type: string
-          description: UID of the workflow node.
-        type:
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
           type: string
-          description: Type of workflow node (e.g., ChaosNode, SerialNode, ParallelNode, SuspendNode, TaskNode).
-        state:
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    ConditionalBranch:
+      type: object
+      description: A conditional branch in a workflow that executes based on an expression.
+      properties:
+        target:
           type: string
-          description: Execution state of the node (e.g., Running, Succeeded, Failed, Pending).
-        template:
+          description: Name of the template to execute if the condition is true.
+        expression:
           type: string
-          description: Template name this node is executing.
-        serial:
-          type: boolean
-          description: Whether this node is executing in serial order.
+          description: Boolean expression that determines whether to take this branch.
     WorkflowMeta:
       type: object
       description: Summary metadata for a Chaos Mesh workflow.
@@ -522,13 +561,6 @@ components:
         status:
           type: string
           description: Current status of the workflow.
-    StatusResponse:
-      type: object
-      description: Generic status response for operations that do not return a resource.
-      properties:
-        status:
-          type: string
-          description: Status of the operation (e.g., success).
     KubeObjectMeta:
       type: object
       description: Kubernetes object metadata fields.
@@ -576,38 +608,6 @@ components:
           description: Conditional branches for workflow decision points.
           items:
             $ref: '#/components/schemas/ConditionalBranch'
-    KubeObjectDesc:
-      type: object
-      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
-      properties:
-        apiVersion:
-          type: string
-          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
-        kind:
-          type: string
-          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
-        metadata:
-          $ref: '#/components/schemas/KubeObjectMeta'
-        spec:
-          type: object
-          description: Resource-specific spec object containing the chaos configuration.
-          additionalProperties: true
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
     WorkflowDetail_2:
       type: object
       description: Full details of a Chaos Mesh workflow including spec and node status.
@@ -679,6 +679,18 @@ components:
               items:
                 type: object
                 additionalProperties: true
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
     WorkflowSummary:
       type: object
       description: Summary of a Chaos Mesh workflow as returned in list operations.
@@ -708,26 +720,7 @@ components:
           type: string
           format: date-time
           description: Timestamp when the workflow completed, if finished.
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
   parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
     uidParam:
       name: uid
       in: path
@@ -736,14 +729,13 @@ components:
       schema:
         type: string
         format: uuid
-    NamespaceQuery:
+    namespaceParam:
       name: namespace
       in: query
+      description: Kubernetes namespace to scope the request to.
       required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
       schema:
         type: string
-        example: default
     NameQuery:
       name: name
       in: query
@@ -751,14 +743,6 @@ components:
       description: Name substring to filter results by.
       schema:
         type: string
-    WorkflowUID:
-      name: uid
-      in: path
-      required: true
-      description: Unique identifier (UUID) of the workflow.
-      schema:
-        type: string
-        format: uuid
     StatusQuery:
       name: status
       in: query
@@ -772,7 +756,29 @@ components:
         - finished
         - paused
         - stopped
+    WorkflowUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the workflow.
+      schema:
+        type: string
+        format: uuid
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
   responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
     NotFound:
       description: Resource not found.
       content:
@@ -785,32 +791,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound_2:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     BadRequest_2:
       description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
       content:
         application/json:
           schema:

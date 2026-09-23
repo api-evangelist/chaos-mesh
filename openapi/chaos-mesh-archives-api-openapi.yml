@@ -441,6 +441,29 @@ paths:
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
   schemas:
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
     ArchiveDetail:
       type: object
       description: Detailed information about an archived chaos resource.
@@ -493,13 +516,22 @@ components:
           type: string
           format: date-time
           description: Timestamp when the resource was deleted and archived.
-    StatusResponse:
+    KubeObjectDesc:
       type: object
-      description: Generic status response for operations that do not return a resource.
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
       properties:
-        status:
+        apiVersion:
           type: string
-          description: Status of the operation (e.g., success).
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
     KubeObjectMeta:
       type: object
       description: Kubernetes object metadata fields.
@@ -520,67 +552,6 @@ components:
           description: Annotations applied to the resource.
           additionalProperties:
             type: string
-    KubeObjectDesc:
-      type: object
-      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
-      properties:
-        apiVersion:
-          type: string
-          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
-        kind:
-          type: string
-          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
-        metadata:
-          $ref: '#/components/schemas/KubeObjectMeta'
-        spec:
-          type: object
-          description: Resource-specific spec object containing the chaos configuration.
-          additionalProperties: true
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
-    ArchiveDetail_2:
-      type: object
-      description: Full details of an archived chaos experiment.
-      properties:
-        uid:
-          type: string
-          format: uuid
-          description: Unique identifier of the archived experiment.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the archived experiment.
-        name:
-          type: string
-          description: Name of the archived experiment.
-        kind:
-          type: string
-          description: Chaos type kind.
-        spec:
-          type: object
-          description: Original chaos experiment specification at the time of archival.
-          additionalProperties: true
-        start_time:
-          type: string
-          format: date-time
-          description: Timestamp when the experiment began.
-        finish_time:
-          type: string
-          format: date-time
-          description: Timestamp when the experiment was archived.
     ArchiveSummary:
       type: object
       description: Summary entry for an archived chaos experiment in the historical record.
@@ -618,14 +589,36 @@ components:
           type: string
           description: Human-readable error message.
           example: experiment not found
+    ArchiveDetail_2:
+      type: object
+      description: Full details of an archived chaos experiment.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the archived experiment.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the archived experiment.
+        name:
+          type: string
+          description: Name of the archived experiment.
+        kind:
+          type: string
+          description: Chaos type kind.
+        spec:
+          type: object
+          description: Original chaos experiment specification at the time of archival.
+          additionalProperties: true
+        start_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment began.
+        finish_time:
+          type: string
+          format: date-time
+          description: Timestamp when the experiment was archived.
   parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
     uidParam:
       name: uid
       in: path
@@ -634,14 +627,20 @@ components:
       schema:
         type: string
         format: uuid
-    NamespaceQuery:
+    namespaceParam:
       name: namespace
       in: query
+      description: Kubernetes namespace to scope the request to.
       required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
       schema:
         type: string
-        example: default
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
     KindQuery:
       name: kind
       in: query
@@ -670,14 +669,21 @@ components:
       schema:
         type: string
         format: uuid
-    NameQuery:
-      name: name
+    NamespaceQuery:
+      name: namespace
       in: query
       required: false
-      description: Name substring to filter results by.
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
       schema:
         type: string
+        example: default
   responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
     NotFound:
       description: Resource not found.
       content:
@@ -690,20 +696,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound_2:
-      description: Resource not found
+    InternalError:
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Internal server error
+    NotFound_2:
+      description: Resource not found
       content:
         application/json:
           schema:

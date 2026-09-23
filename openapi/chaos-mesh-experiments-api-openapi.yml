@@ -463,6 +463,22 @@ components:
           description: Current status of the experiment.
         kube_object:
           $ref: '#/components/schemas/KubeObjectDesc'
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
     Experiment:
       type: object
       description: Summary of a Chaos Mesh experiment stored in the Chaos Mesh database.
@@ -494,6 +510,41 @@ components:
         status:
           type: string
           description: Status of the operation (e.g., success).
+    KubeObjectDesc:
+      type: object
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      properties:
+        apiVersion:
+          type: string
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
+          type: string
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    ExperimentState:
+      type: object
+      description: Summary count of experiments grouped by status.
+      properties:
+        running:
+          type: integer
+          description: Number of currently running experiments.
+        paused:
+          type: integer
+          description: Number of paused experiments.
+        stopped:
+          type: integer
+          description: Number of stopped experiments.
+        finished:
+          type: integer
+          description: Number of finished experiments.
+        total:
+          type: integer
+          description: Total number of experiments.
     KubeObjectMeta:
       type: object
       description: Kubernetes object metadata fields.
@@ -514,57 +565,6 @@ components:
           description: Annotations applied to the resource.
           additionalProperties:
             type: string
-    ExperimentState:
-      type: object
-      description: Summary count of experiments grouped by status.
-      properties:
-        running:
-          type: integer
-          description: Number of currently running experiments.
-        paused:
-          type: integer
-          description: Number of paused experiments.
-        stopped:
-          type: integer
-          description: Number of stopped experiments.
-        finished:
-          type: integer
-          description: Number of finished experiments.
-        total:
-          type: integer
-          description: Total number of experiments.
-    KubeObjectDesc:
-      type: object
-      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
-      properties:
-        apiVersion:
-          type: string
-          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
-        kind:
-          type: string
-          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
-        metadata:
-          $ref: '#/components/schemas/KubeObjectMeta'
-        spec:
-          type: object
-          description: Resource-specific spec object containing the chaos configuration.
-          additionalProperties: true
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
     ExperimentDetail_2:
       type: object
       description: Full details of a chaos experiment including spec, status, and affected resources.
@@ -598,6 +598,18 @@ components:
           type: object
           description: Derived experiment information including the list of affected pods.
           additionalProperties: true
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
     ExperimentCreateRequest:
       type: object
       description: Request body for creating a chaos experiment. The apiVersion, kind, metadata, and spec fields map directly to a Kubernetes custom resource manifest.
@@ -690,26 +702,7 @@ components:
           - finished
           - paused
           - stopped
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
   parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
     uidParam:
       name: uid
       in: path
@@ -718,14 +711,33 @@ components:
       schema:
         type: string
         format: uuid
-    NamespaceQuery:
+    namespaceParam:
       name: namespace
       in: query
+      description: Kubernetes namespace to scope the request to.
       required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
       schema:
         type: string
-        example: default
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Status to filter experiments or schedules by.
+      schema:
+        type: string
+        enum:
+        - injecting
+        - running
+        - finished
+        - paused
+        - stopped
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
     KindQuery:
       name: kind
       in: query
@@ -754,27 +766,21 @@ components:
       schema:
         type: string
         format: uuid
-    NameQuery:
-      name: name
+    NamespaceQuery:
+      name: namespace
       in: query
       required: false
-      description: Name substring to filter results by.
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
       schema:
         type: string
-    StatusQuery:
-      name: status
-      in: query
-      required: false
-      description: Status to filter experiments or schedules by.
-      schema:
-        type: string
-        enum:
-        - injecting
-        - running
-        - finished
-        - paused
-        - stopped
+        example: default
   responses:
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
     NotFound:
       description: Resource not found.
       content:
@@ -787,32 +793,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound_2:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
+    NotFound_2:
+      description: Resource not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     BadRequest_2:
       description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
       content:
         application/json:
           schema:
