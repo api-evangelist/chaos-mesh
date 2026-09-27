@@ -151,6 +151,32 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    StatusCheckTemplate:
+      type: object
+      description: A status check template for use in workflow status check nodes.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    StatusCheckTemplateBase:
+      type: object
+      description: Base summary of a status check template.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace of the template.
+        name:
+          type: string
+          description: Name of the status check template.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
     APIError:
       type: object
       description: Error response returned when an API request fails.
@@ -167,6 +193,29 @@ components:
         full_text:
           type: string
           description: Full error text including stack trace or detailed cause.
+    HTTPCriteria:
+      type: object
+      description: Criteria for determining a successful status check response.
+      properties:
+        statusCode:
+          type: string
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
     HTTPStatusCheckSpec:
       type: object
       description: HTTP-specific configuration for a status check.
@@ -193,20 +242,6 @@ components:
           description: Request body for POST requests.
         criteria:
           $ref: '#/components/schemas/HTTPCriteria'
-    StatusCheckTemplateBase:
-      type: object
-      description: Base summary of a status check template.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace of the template.
-        name:
-          type: string
-          description: Name of the status check template.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
     StatusResponse:
       type: object
       description: Generic status response for operations that do not return a resource.
@@ -214,41 +249,6 @@ components:
         status:
           type: string
           description: Status of the operation (e.g., success).
-    HTTPCriteria:
-      type: object
-      description: Criteria for determining a successful status check response.
-      properties:
-        statusCode:
-          type: string
-          description: Expected HTTP status code or range (e.g., "200" or "200-299").
-    StatusCheckTemplate:
-      type: object
-      description: A status check template for use in workflow status check nodes.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace.
-        name:
-          type: string
-          description: Template name.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
-    StatusCheckTemplateDetail:
-      type: object
-      description: Detailed status check template with full spec.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace.
-        name:
-          type: string
-          description: Template name.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
     StatusCheckSpec:
       type: object
       description: Specification for a status check that polls an HTTP endpoint.
@@ -277,8 +277,8 @@ components:
         http:
           $ref: '#/components/schemas/HTTPStatusCheckSpec'
   responses:
-    InternalServerError:
-      description: Internal server error.
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
       content:
         application/json:
           schema:
@@ -289,8 +289,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
+    InternalServerError:
+      description: Internal server error.
       content:
         application/json:
           schema:

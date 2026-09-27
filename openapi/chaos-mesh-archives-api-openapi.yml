@@ -440,30 +440,105 @@ paths:
           default: '2333'
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
-    APIError:
+    KubeObjectDesc:
       type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
+      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
       properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
+        apiVersion:
           type: string
-          description: Human-readable description of the error.
-        full_text:
+          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
+        kind:
           type: string
-          description: Full error text including stack trace or detailed cause.
-    StatusResponse:
+          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
+        metadata:
+          $ref: '#/components/schemas/KubeObjectMeta'
+        spec:
+          type: object
+          description: Resource-specific spec object containing the chaos configuration.
+          additionalProperties: true
+    Archive:
       type: object
-      description: Generic status response for operations that do not return a resource.
+      description: Summary record of an archived chaos experiment, schedule, or workflow.
       properties:
-        status:
+        uid:
           type: string
-          description: Status of the operation (e.g., success).
+          format: uuid
+          description: Unique identifier of the archived resource.
+        name:
+          type: string
+          description: Name of the archived resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace where the resource existed.
+        kind:
+          type: string
+          description: Chaos kind or resource type of the archived resource.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was originally created.
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp when the resource was deleted and archived.
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
     ArchiveDetail:
       type: object
       description: Detailed information about an archived chaos resource.
@@ -491,67 +566,41 @@ components:
           description: Timestamp when the resource was archived.
         kube_object:
           $ref: '#/components/schemas/KubeObjectDesc'
-    Archive:
+    APIError:
       type: object
-      description: Summary record of an archived chaos experiment, schedule, or workflow.
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
       properties:
-        uid:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
           type: string
-          format: uuid
-          description: Unique identifier of the archived resource.
-        name:
+          description: Human-readable description of the error.
+        full_text:
           type: string
-          description: Name of the archived resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace where the resource existed.
-        kind:
-          type: string
-          description: Chaos kind or resource type of the archived resource.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the resource was originally created.
-        deleted_at:
-          type: string
-          format: date-time
-          description: Timestamp when the resource was deleted and archived.
-    KubeObjectDesc:
+          description: Full error text including stack trace or detailed cause.
+    StatusResponse:
       type: object
-      description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
+      description: Generic status response for operations that do not return a resource.
       properties:
-        apiVersion:
+        status:
           type: string
-          description: Kubernetes API version (e.g., chaos-mesh.org/v1alpha1).
-        kind:
-          type: string
-          description: Kubernetes resource kind (e.g., PodChaos, NetworkChaos).
-        metadata:
-          $ref: '#/components/schemas/KubeObjectMeta'
-        spec:
-          type: object
-          description: Resource-specific spec object containing the chaos configuration.
-          additionalProperties: true
-    KubeObjectMeta:
+          description: Status of the operation (e.g., success).
+    ErrorResponse:
       type: object
-      description: Kubernetes object metadata fields.
+      description: Error response returned when an API operation fails.
       properties:
-        name:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
           type: string
-          description: Name of the Kubernetes resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource.
-        labels:
-          type: object
-          description: Labels applied to the resource.
-          additionalProperties:
-            type: string
-        annotations:
-          type: object
-          description: Annotations applied to the resource.
-          additionalProperties:
-            type: string
+          description: Human-readable error message.
+          example: experiment not found
     ArchiveSummary:
       type: object
       description: Summary entry for an archived chaos experiment in the historical record.
@@ -577,18 +626,6 @@ components:
           type: string
           format: date-time
           description: Timestamp when the experiment was archived.
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
     ArchiveDetail_2:
       type: object
       description: Full details of an archived chaos experiment.
@@ -619,6 +656,13 @@ components:
           format: date-time
           description: Timestamp when the experiment was archived.
   parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
     uidParam:
       name: uid
       in: path
@@ -627,20 +671,14 @@ components:
       schema:
         type: string
         format: uuid
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
+    ArchiveUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the archived experiment.
       schema:
         type: string
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
+        format: uuid
     KindQuery:
       name: kind
       in: query
@@ -661,14 +699,13 @@ components:
         - GCPChaos
         - JVMChaos
         - PhysicalMachineChaos
-    ArchiveUID:
-      name: uid
-      in: path
-      required: true
-      description: Unique identifier (UUID) of the archived experiment.
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
       schema:
         type: string
-        format: uuid
     NamespaceQuery:
       name: namespace
       in: query
@@ -677,43 +714,6 @@ components:
       schema:
         type: string
         example: default
-  responses:
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    NotFound_2:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http
