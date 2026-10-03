@@ -399,6 +399,87 @@ paths:
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
   schemas:
+    WorkflowMeta:
+      type: object
+      description: Summary metadata for a Chaos Mesh workflow.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier of the workflow.
+        name:
+          type: string
+          description: Name of the workflow Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the workflow.
+        entry:
+          type: string
+          description: Name of the entry template in the workflow.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow was created.
+        end_time:
+          type: string
+          format: date-time
+          description: Timestamp when the workflow finished, if applicable.
+        status:
+          type: string
+          description: Current status of the workflow.
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    ConditionalBranch:
+      type: object
+      description: A conditional branch in a workflow that executes based on an expression.
+      properties:
+        target:
+          type: string
+          description: Name of the template to execute if the condition is true.
+        expression:
+          type: string
+          description: Boolean expression that determines whether to take this branch.
+    Template:
+      type: object
+      description: A workflow template defining a single step or group in a chaos workflow.
+      properties:
+        name:
+          type: string
+          description: Unique name of the template within the workflow.
+        templateType:
+          type: string
+          description: Type of the template (e.g., Task, Serial, Parallel, Suspend, Schedule).
+        deadline:
+          type: string
+          description: Maximum duration for this template step.
+        task:
+          type: object
+          description: Task-specific configuration for HTTP or chaos tasks.
+          additionalProperties: true
+        children:
+          type: array
+          description: Child template names for serial or parallel groups.
+          items:
+            type: string
+        conditionalBranches:
+          type: array
+          description: Conditional branches for workflow decision points.
+          items:
+            $ref: '#/components/schemas/ConditionalBranch'
     Node:
       type: object
       description: A node in the workflow topology representing a single execution step.
@@ -430,61 +511,6 @@ components:
           description: List of workflow nodes representing individual steps.
           items:
             $ref: '#/components/schemas/Node'
-    Template:
-      type: object
-      description: A workflow template defining a single step or group in a chaos workflow.
-      properties:
-        name:
-          type: string
-          description: Unique name of the template within the workflow.
-        templateType:
-          type: string
-          description: Type of the template (e.g., Task, Serial, Parallel, Suspend, Schedule).
-        deadline:
-          type: string
-          description: Maximum duration for this template step.
-        task:
-          type: object
-          description: Task-specific configuration for HTTP or chaos tasks.
-          additionalProperties: true
-        children:
-          type: array
-          description: Child template names for serial or parallel groups.
-          items:
-            type: string
-        conditionalBranches:
-          type: array
-          description: Conditional branches for workflow decision points.
-          items:
-            $ref: '#/components/schemas/ConditionalBranch'
-    WorkflowMeta:
-      type: object
-      description: Summary metadata for a Chaos Mesh workflow.
-      properties:
-        uid:
-          type: string
-          format: uuid
-          description: Unique identifier of the workflow.
-        name:
-          type: string
-          description: Name of the workflow Kubernetes resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the workflow.
-        entry:
-          type: string
-          description: Name of the entry template in the workflow.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the workflow was created.
-        end_time:
-          type: string
-          format: date-time
-          description: Timestamp when the workflow finished, if applicable.
-        status:
-          type: string
-          description: Current status of the workflow.
     HttpRequestForm:
       type: object
       description: Form representation of an HTTP workflow task for use in the UI.
@@ -517,6 +543,26 @@ components:
         timeout:
           type: string
           description: Request timeout duration.
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
     WorkflowDetail:
       type: object
       description: Detailed information about a chaos workflow including node topology.
@@ -565,52 +611,6 @@ components:
           type: object
           description: Resource-specific spec object containing the chaos configuration.
           additionalProperties: true
-    KubeObjectMeta:
-      type: object
-      description: Kubernetes object metadata fields.
-      properties:
-        name:
-          type: string
-          description: Name of the Kubernetes resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource.
-        labels:
-          type: object
-          description: Labels applied to the resource.
-          additionalProperties:
-            type: string
-        annotations:
-          type: object
-          description: Annotations applied to the resource.
-          additionalProperties:
-            type: string
-    ConditionalBranch:
-      type: object
-      description: A conditional branch in a workflow that executes based on an expression.
-      properties:
-        target:
-          type: string
-          description: Name of the template to execute if the condition is true.
-        expression:
-          type: string
-          description: Boolean expression that determines whether to take this branch.
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
     StatusResponse:
       type: object
       description: Generic status response for operations that do not return a resource.
@@ -618,6 +618,52 @@ components:
         status:
           type: string
           description: Status of the operation (e.g., success).
+    WorkflowCreateRequest:
+      type: object
+      description: Request body for creating or updating a Chaos Mesh workflow.
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      properties:
+        apiVersion:
+          type: string
+          const: chaos-mesh.org/v1alpha1
+          description: Chaos Mesh API version.
+        kind:
+          type: string
+          const: Workflow
+          description: Resource kind identifier.
+        metadata:
+          type: object
+          description: Kubernetes object metadata.
+          required:
+          - name
+          - namespace
+          properties:
+            name:
+              type: string
+              description: Name of the workflow resource.
+            namespace:
+              type: string
+              description: Kubernetes namespace for the workflow.
+        spec:
+          type: object
+          description: Workflow specification defining the entry point, templates, and task graph.
+          required:
+          - entry
+          - templates
+          properties:
+            entry:
+              type: string
+              description: Name of the entry point template in the workflow.
+            templates:
+              type: array
+              description: List of workflow task templates defining chaos experiments, suspend steps, serial sequences, or parallel groups.
+              items:
+                type: object
+                additionalProperties: true
     ErrorResponse:
       type: object
       description: Error response returned when an API operation fails.
@@ -684,61 +730,9 @@ components:
           type: string
           format: date-time
           description: Timestamp when the workflow completed, if finished.
-    WorkflowCreateRequest:
-      type: object
-      description: Request body for creating or updating a Chaos Mesh workflow.
-      required:
-      - apiVersion
-      - kind
-      - metadata
-      - spec
-      properties:
-        apiVersion:
-          type: string
-          const: chaos-mesh.org/v1alpha1
-          description: Chaos Mesh API version.
-        kind:
-          type: string
-          const: Workflow
-          description: Resource kind identifier.
-        metadata:
-          type: object
-          description: Kubernetes object metadata.
-          required:
-          - name
-          - namespace
-          properties:
-            name:
-              type: string
-              description: Name of the workflow resource.
-            namespace:
-              type: string
-              description: Kubernetes namespace for the workflow.
-        spec:
-          type: object
-          description: Workflow specification defining the entry point, templates, and task graph.
-          required:
-          - entry
-          - templates
-          properties:
-            entry:
-              type: string
-              description: Name of the entry point template in the workflow.
-            templates:
-              type: array
-              description: List of workflow task templates defining chaos experiments, suspend steps, serial sequences, or parallel groups.
-              items:
-                type: object
-                additionalProperties: true
   responses:
     BadRequest:
       description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
       content:
         application/json:
           schema:
@@ -749,20 +743,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    BadRequest_2:
-      description: Bad request — invalid parameters or malformed body
+    NotFound:
+      description: Resource not found.
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorResponse'
+            $ref: '#/components/schemas/APIError'
     InternalError:
       description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    NotFound_2:
-      description: Resource not found
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
       content:
         application/json:
           schema:
@@ -773,7 +767,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   parameters:
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
     namespaceParam:
       name: namespace
       in: query
@@ -781,11 +789,26 @@ components:
       required: false
       schema:
         type: string
-    uidParam:
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    WorkflowUID:
       name: uid
       in: path
-      description: UUID of the chaos resource.
       required: true
+      description: Unique identifier (UUID) of the workflow.
       schema:
         type: string
         format: uuid
@@ -802,29 +825,6 @@ components:
         - finished
         - paused
         - stopped
-    WorkflowUID:
-      name: uid
-      in: path
-      required: true
-      description: Unique identifier (UUID) of the workflow.
-      schema:
-        type: string
-        format: uuid
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
-    NamespaceQuery:
-      name: namespace
-      in: query
-      required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
-      schema:
-        type: string
-        example: default
   securitySchemes:
     bearerAuth:
       type: http

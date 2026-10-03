@@ -408,6 +408,42 @@ paths:
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
   schemas:
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
     ScheduleDetail:
       type: object
       description: Detailed information about a chaos schedule.
@@ -450,26 +486,13 @@ components:
           type: object
           description: Resource-specific spec object containing the chaos configuration.
           additionalProperties: true
-    KubeObjectMeta:
+    StatusResponse:
       type: object
-      description: Kubernetes object metadata fields.
+      description: Generic status response for operations that do not return a resource.
       properties:
-        name:
+        status:
           type: string
-          description: Name of the Kubernetes resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource.
-        labels:
-          type: object
-          description: Labels applied to the resource.
-          additionalProperties:
-            type: string
-        annotations:
-          type: object
-          description: Annotations applied to the resource.
-          additionalProperties:
-            type: string
+          description: Status of the operation (e.g., success).
     Schedule:
       type: object
       description: Summary of a Chaos Mesh schedule.
@@ -494,32 +517,9 @@ components:
         status:
           type: string
           description: Current status of the schedule.
-    APIError:
+    ScheduleSummary:
       type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
-    StatusResponse:
-      type: object
-      description: Generic status response for operations that do not return a resource.
-      properties:
-        status:
-          type: string
-          description: Status of the operation (e.g., success).
-    ScheduleDetail_2:
-      type: object
-      description: Full details of a chaos schedule including spec and experiment history.
+      description: Summary of a chaos schedule as returned in list operations.
       properties:
         uid:
           type: string
@@ -531,25 +531,16 @@ components:
         name:
           type: string
           description: Name of the schedule resource.
-        spec:
-          type: object
-          description: Full schedule specification as a Kubernetes custom resource spec.
-          additionalProperties: true
+        kind:
+          type: string
+          description: Chaos type kind of the wrapped experiment.
         status:
           type: string
-          description: Current execution status.
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
+          description: Current status of the schedule.
+        created_at:
           type: string
-          description: Human-readable error message.
-          example: experiment not found
+          format: date-time
+          description: Timestamp when the schedule was created.
     ScheduleCreateRequest:
       type: object
       description: Request body for creating a chaos experiment schedule.
@@ -607,9 +598,21 @@ components:
               type: string
               description: Chaos type kind for the embedded experiment.
               example: PodChaos
-    ScheduleSummary:
+    ErrorResponse:
       type: object
-      description: Summary of a chaos schedule as returned in list operations.
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    ScheduleDetail_2:
+      type: object
+      description: Full details of a chaos schedule including spec and experiment history.
       properties:
         uid:
           type: string
@@ -621,67 +624,14 @@ components:
         name:
           type: string
           description: Name of the schedule resource.
-        kind:
-          type: string
-          description: Chaos type kind of the wrapped experiment.
+        spec:
+          type: object
+          description: Full schedule specification as a Kubernetes custom resource spec.
+          additionalProperties: true
         status:
           type: string
-          description: Current status of the schedule.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the schedule was created.
-  responses:
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    BadRequest_2:
-      description: Bad request — invalid parameters or malformed body
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    NotFound_2:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Unauthorized — authentication required
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
+          description: Current execution status.
   parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
     uidParam:
       name: uid
       in: path
@@ -690,6 +640,28 @@ components:
       schema:
         type: string
         format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
     StatusQuery:
       name: status
       in: query
@@ -711,21 +683,49 @@ components:
       schema:
         type: string
         format: uuid
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
-    NamespaceQuery:
-      name: namespace
-      in: query
-      required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
-      schema:
-        type: string
-        example: default
+  responses:
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Unauthorized — authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http

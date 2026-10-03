@@ -151,6 +151,65 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 components:
   schemas:
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
+    StatusCheckSpec:
+      type: object
+      description: Specification for a status check that polls an HTTP endpoint.
+      properties:
+        type:
+          type: string
+          description: Type of status check (currently HTTP).
+          enum:
+          - HTTP
+        intervalSeconds:
+          type: integer
+          minimum: 1
+          description: Polling interval in seconds.
+        timeoutSeconds:
+          type: integer
+          minimum: 1
+          description: Timeout for each HTTP request in seconds.
+        successThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive successes required to mark healthy.
+        failureThreshold:
+          type: integer
+          minimum: 1
+          description: Number of consecutive failures required to mark unhealthy.
+        http:
+          $ref: '#/components/schemas/HTTPStatusCheckSpec'
     StatusCheckTemplate:
       type: object
       description: A status check template for use in workflow status check nodes.
@@ -177,45 +236,6 @@ components:
           type: string
           format: date-time
           description: Timestamp when the template was created.
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
-    HTTPCriteria:
-      type: object
-      description: Criteria for determining a successful status check response.
-      properties:
-        statusCode:
-          type: string
-          description: Expected HTTP status code or range (e.g., "200" or "200-299").
-    StatusCheckTemplateDetail:
-      type: object
-      description: Detailed status check template with full spec.
-      properties:
-        namespace:
-          type: string
-          description: Kubernetes namespace.
-        name:
-          type: string
-          description: Template name.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the template was created.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
     HTTPStatusCheckSpec:
       type: object
       description: HTTP-specific configuration for a status check.
@@ -249,33 +269,13 @@ components:
         status:
           type: string
           description: Status of the operation (e.g., success).
-    StatusCheckSpec:
+    HTTPCriteria:
       type: object
-      description: Specification for a status check that polls an HTTP endpoint.
+      description: Criteria for determining a successful status check response.
       properties:
-        type:
+        statusCode:
           type: string
-          description: Type of status check (currently HTTP).
-          enum:
-          - HTTP
-        intervalSeconds:
-          type: integer
-          minimum: 1
-          description: Polling interval in seconds.
-        timeoutSeconds:
-          type: integer
-          minimum: 1
-          description: Timeout for each HTTP request in seconds.
-        successThreshold:
-          type: integer
-          minimum: 1
-          description: Number of consecutive successes required to mark healthy.
-        failureThreshold:
-          type: integer
-          minimum: 1
-          description: Number of consecutive failures required to mark unhealthy.
-        http:
-          $ref: '#/components/schemas/HTTPStatusCheckSpec'
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
   responses:
     BadRequest:
       description: Bad request — invalid parameters or request body.
@@ -283,14 +283,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
+    InternalServerError:
+      description: Internal server error.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
+    NotFound:
+      description: Resource not found.
       content:
         application/json:
           schema:
