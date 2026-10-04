@@ -211,6 +211,9 @@ apis:
   - type: JSONLD
     url: json-ld/chaos-mesh-context.jsonld
 common:
+  - type: CapabilityMap
+    url: capabilities/chaos-mesh-capability-edges.yml
+    name: Chaos Mesh Business Capability Map
   - type: IssueTracker
     url: https://github.com/chaos-mesh/chaos-mesh/issues
   - type: Releases
