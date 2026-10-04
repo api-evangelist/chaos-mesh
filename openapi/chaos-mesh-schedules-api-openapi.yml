@@ -408,42 +408,6 @@ paths:
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
   schemas:
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
-    KubeObjectMeta:
-      type: object
-      description: Kubernetes object metadata fields.
-      properties:
-        name:
-          type: string
-          description: Name of the Kubernetes resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource.
-        labels:
-          type: object
-          description: Labels applied to the resource.
-          additionalProperties:
-            type: string
-        annotations:
-          type: object
-          description: Annotations applied to the resource.
-          additionalProperties:
-            type: string
     ScheduleDetail:
       type: object
       description: Detailed information about a chaos schedule.
@@ -470,6 +434,49 @@ components:
           description: Current status of the schedule.
         kube_object:
           $ref: '#/components/schemas/KubeObjectDesc'
+    KubeObjectMeta:
+      type: object
+      description: Kubernetes object metadata fields.
+      properties:
+        name:
+          type: string
+          description: Name of the Kubernetes resource.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the resource.
+        labels:
+          type: object
+          description: Labels applied to the resource.
+          additionalProperties:
+            type: string
+        annotations:
+          type: object
+          description: Annotations applied to the resource.
+          additionalProperties:
+            type: string
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
     KubeObjectDesc:
       type: object
       description: A Kubernetes object description used to represent chaos custom resources. Contains the full spec of a Kubernetes resource including apiVersion, kind, metadata, and spec.
@@ -486,13 +493,6 @@ components:
           type: object
           description: Resource-specific spec object containing the chaos configuration.
           additionalProperties: true
-    StatusResponse:
-      type: object
-      description: Generic status response for operations that do not return a resource.
-      properties:
-        status:
-          type: string
-          description: Status of the operation (e.g., success).
     Schedule:
       type: object
       description: Summary of a Chaos Mesh schedule.
@@ -517,30 +517,6 @@ components:
         status:
           type: string
           description: Current status of the schedule.
-    ScheduleSummary:
-      type: object
-      description: Summary of a chaos schedule as returned in list operations.
-      properties:
-        uid:
-          type: string
-          format: uuid
-          description: Unique identifier for the schedule.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the schedule.
-        name:
-          type: string
-          description: Name of the schedule resource.
-        kind:
-          type: string
-          description: Chaos type kind of the wrapped experiment.
-        status:
-          type: string
-          description: Current status of the schedule.
-        created_at:
-          type: string
-          format: date-time
-          description: Timestamp when the schedule was created.
     ScheduleCreateRequest:
       type: object
       description: Request body for creating a chaos experiment schedule.
@@ -598,18 +574,6 @@ components:
               type: string
               description: Chaos type kind for the embedded experiment.
               example: PodChaos
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
     ScheduleDetail_2:
       type: object
       description: Full details of a chaos schedule including spec and experiment history.
@@ -631,61 +595,45 @@ components:
         status:
           type: string
           description: Current execution status.
-  parameters:
-    uidParam:
-      name: uid
-      in: path
-      description: UUID of the chaos resource.
-      required: true
-      schema:
-        type: string
-        format: uuid
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
-    NamespaceQuery:
-      name: namespace
-      in: query
-      required: false
-      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
-      schema:
-        type: string
-        example: default
-    NameQuery:
-      name: name
-      in: query
-      required: false
-      description: Name substring to filter results by.
-      schema:
-        type: string
-    StatusQuery:
-      name: status
-      in: query
-      required: false
-      description: Status to filter experiments or schedules by.
-      schema:
-        type: string
-        enum:
-        - injecting
-        - running
-        - finished
-        - paused
-        - stopped
-    ScheduleUID:
-      name: uid
-      in: path
-      required: true
-      description: Unique identifier (UUID) of the schedule.
-      schema:
-        type: string
-        format: uuid
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
+    ScheduleSummary:
+      type: object
+      description: Summary of a chaos schedule as returned in list operations.
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the schedule.
+        namespace:
+          type: string
+          description: Kubernetes namespace of the schedule.
+        name:
+          type: string
+          description: Name of the schedule resource.
+        kind:
+          type: string
+          description: Chaos type kind of the wrapped experiment.
+        status:
+          type: string
+          description: Current status of the schedule.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the schedule was created.
   responses:
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
+    NotFound:
+      description: Resource not found.
       content:
         application/json:
           schema:
@@ -696,12 +644,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
+    NotFound_2:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal server error
       content:
@@ -720,12 +674,58 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    NotFound_2:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
+    uidParam:
+      name: uid
+      in: path
+      description: UUID of the chaos resource.
+      required: true
+      schema:
+        type: string
+        format: uuid
+    NamespaceQuery:
+      name: namespace
+      in: query
+      required: false
+      description: Kubernetes namespace to filter results by. If omitted, returns results from all namespaces.
+      schema:
+        type: string
+        example: default
+    NameQuery:
+      name: name
+      in: query
+      required: false
+      description: Name substring to filter results by.
+      schema:
+        type: string
+    ScheduleUID:
+      name: uid
+      in: path
+      required: true
+      description: Unique identifier (UUID) of the schedule.
+      schema:
+        type: string
+        format: uuid
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Status to filter experiments or schedules by.
+      schema:
+        type: string
+        enum:
+        - injecting
+        - running
+        - finished
+        - paused
+        - stopped
   securitySchemes:
     bearerAuth:
       type: http

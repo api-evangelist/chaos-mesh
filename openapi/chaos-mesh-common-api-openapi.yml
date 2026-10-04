@@ -331,23 +331,28 @@ paths:
           default: '2333'
           description: Port on which the Chaos Mesh Dashboard API listens.
 components:
+  parameters:
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
   schemas:
-    APIError:
+    PhysicalMachine:
       type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
+      description: A physical machine or VM registered as a Chaos Mesh target.
       properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
+        name:
           type: string
-          description: Human-readable description of the error.
-        full_text:
+          description: Name of the PhysicalMachine resource.
+        namespace:
           type: string
-          description: Full error text including stack trace or detailed cause.
+          description: Kubernetes namespace of the resource.
+        address:
+          type: string
+          description: Network address of the physical machine's chaos-daemon.
     Pod:
       type: object
       description: Summary of a Kubernetes pod available for chaos targeting.
@@ -364,6 +369,22 @@ components:
         state:
           type: string
           description: Pod state (e.g., Running, Pending, Succeeded, Failed).
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
     MapStringSliceResponse:
       type: object
       description: A map from string keys to arrays of string values.
@@ -371,6 +392,22 @@ components:
         type: array
         items:
           type: string
+    DashboardConfig:
+      type: object
+      description: Configuration settings for the Chaos Mesh Dashboard.
+      properties:
+        security_mode:
+          type: boolean
+          description: Whether security mode requiring authentication is enabled.
+        dns_server_create:
+          type: boolean
+          description: Whether Chaos Mesh should create a DNS server for DNS chaos.
+        version:
+          type: string
+          description: Version of Chaos Mesh currently running.
+        enable_filter_namespace:
+          type: boolean
+          description: Whether namespace filtering is enabled for the dashboard.
     SelectorRequest:
       type: object
       description: Request body for selecting pods or physical machines by label selectors.
@@ -388,35 +425,6 @@ components:
           description: Key-value pairs for annotation selection.
           additionalProperties:
             type: string
-    PhysicalMachine:
-      type: object
-      description: A physical machine or VM registered as a Chaos Mesh target.
-      properties:
-        name:
-          type: string
-          description: Name of the PhysicalMachine resource.
-        namespace:
-          type: string
-          description: Kubernetes namespace of the resource.
-        address:
-          type: string
-          description: Network address of the physical machine's chaos-daemon.
-    DashboardConfig:
-      type: object
-      description: Configuration settings for the Chaos Mesh Dashboard.
-      properties:
-        security_mode:
-          type: boolean
-          description: Whether security mode requiring authentication is enabled.
-        dns_server_create:
-          type: boolean
-          description: Whether Chaos Mesh should create a DNS server for DNS chaos.
-        version:
-          type: string
-          description: Version of Chaos Mesh currently running.
-        enable_filter_namespace:
-          type: boolean
-          description: Whether namespace filtering is enabled for the dashboard.
     PodSelectorRequest:
       type: object
       description: Request body for previewing which pods match a chaos experiment selector before creating the experiment.
@@ -452,6 +460,18 @@ components:
             type: array
             items:
               type: string
+    ErrorResponse:
+      type: object
+      description: Error response returned when an API operation fails.
+      properties:
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        message:
+          type: string
+          description: Human-readable error message.
+          example: experiment not found
     PodInfo:
       type: object
       description: Information about a Kubernetes pod that could be targeted by a chaos experiment.
@@ -482,39 +502,27 @@ components:
           - Succeeded
           - Failed
           - Unknown
-    ErrorResponse:
-      type: object
-      description: Error response returned when an API operation fails.
-      properties:
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 404
-        message:
-          type: string
-          description: Human-readable error message.
-          example: experiment not found
   responses:
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
     InternalServerError:
       description: Internal server error.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalError:
-      description: Internal server error
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest_2:
+      description: Bad request — invalid parameters or malformed body
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    BadRequest_2:
-      description: Bad request — invalid parameters or malformed body
+    InternalError:
+      description: Internal server error
       content:
         application/json:
           schema:
@@ -525,14 +533,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-  parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
   securitySchemes:
     bearerAuth:
       type: http

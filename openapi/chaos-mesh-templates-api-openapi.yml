@@ -150,23 +150,66 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
+  responses:
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIError'
   schemas:
-    StatusCheckTemplateDetail:
+    HTTPCriteria:
       type: object
-      description: Detailed status check template with full spec.
+      description: Criteria for determining a successful status check response.
       properties:
-        namespace:
+        statusCode:
           type: string
-          description: Kubernetes namespace.
-        name:
+          description: Expected HTTP status code or range (e.g., "200" or "200-299").
+    HTTPStatusCheckSpec:
+      type: object
+      description: HTTP-specific configuration for a status check.
+      properties:
+        url:
           type: string
-          description: Template name.
-        created_at:
+          format: uri
+          description: URL to poll for the health check.
+        method:
           type: string
-          format: date-time
-          description: Timestamp when the template was created.
-        spec:
-          $ref: '#/components/schemas/StatusCheckSpec'
+          enum:
+          - GET
+          - POST
+          description: HTTP method to use.
+        headers:
+          type: object
+          description: HTTP headers to include in the request.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        body:
+          type: string
+          description: Request body for POST requests.
+        criteria:
+          $ref: '#/components/schemas/HTTPCriteria'
+    StatusResponse:
+      type: object
+      description: Generic status response for operations that do not return a resource.
+      properties:
+        status:
+          type: string
+          description: Status of the operation (e.g., success).
     APIError:
       type: object
       description: Error response returned when an API request fails.
@@ -183,6 +226,22 @@ components:
         full_text:
           type: string
           description: Full error text including stack trace or detailed cause.
+    StatusCheckTemplateDetail:
+      type: object
+      description: Detailed status check template with full spec.
+      properties:
+        namespace:
+          type: string
+          description: Kubernetes namespace.
+        name:
+          type: string
+          description: Template name.
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the template was created.
+        spec:
+          $ref: '#/components/schemas/StatusCheckSpec'
     StatusCheckSpec:
       type: object
       description: Specification for a status check that polls an HTTP endpoint.
@@ -236,65 +295,6 @@ components:
           type: string
           format: date-time
           description: Timestamp when the template was created.
-    HTTPStatusCheckSpec:
-      type: object
-      description: HTTP-specific configuration for a status check.
-      properties:
-        url:
-          type: string
-          format: uri
-          description: URL to poll for the health check.
-        method:
-          type: string
-          enum:
-          - GET
-          - POST
-          description: HTTP method to use.
-        headers:
-          type: object
-          description: HTTP headers to include in the request.
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        body:
-          type: string
-          description: Request body for POST requests.
-        criteria:
-          $ref: '#/components/schemas/HTTPCriteria'
-    StatusResponse:
-      type: object
-      description: Generic status response for operations that do not return a resource.
-      properties:
-        status:
-          type: string
-          description: Status of the operation (e.g., success).
-    HTTPCriteria:
-      type: object
-      description: Criteria for determining a successful status check response.
-      properties:
-        statusCode:
-          type: string
-          description: Expected HTTP status code or range (e.g., "200" or "200-299").
-  responses:
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
-    NotFound:
-      description: Resource not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/APIError'
   parameters:
     namespaceParam:
       name: namespace
