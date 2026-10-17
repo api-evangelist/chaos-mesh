@@ -207,14 +207,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    InternalServerError:
-      description: Internal server error.
+    BadRequest:
+      description: Bad request — invalid parameters or request body.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/APIError'
-    BadRequest:
-      description: Bad request — invalid parameters or request body.
+    InternalServerError:
+      description: Internal server error.
       content:
         application/json:
           schema:
@@ -232,13 +232,6 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   parameters:
-    namespaceParam:
-      name: namespace
-      in: query
-      description: Kubernetes namespace to scope the request to.
-      required: false
-      schema:
-        type: string
     uidParam:
       name: uid
       in: path
@@ -247,6 +240,13 @@ components:
       schema:
         type: string
         format: uuid
+    namespaceParam:
+      name: namespace
+      in: query
+      description: Kubernetes namespace to scope the request to.
+      required: false
+      schema:
+        type: string
     NamespaceQuery:
       name: namespace
       in: query
@@ -283,22 +283,6 @@ components:
         - JVMChaos
         - PhysicalMachineChaos
   schemas:
-    APIError:
-      type: object
-      description: Error response returned when an API request fails.
-      required:
-      - code
-      - message
-      properties:
-        code:
-          type: integer
-          description: HTTP status code of the error.
-        message:
-          type: string
-          description: Human-readable description of the error.
-        full_text:
-          type: string
-          description: Full error text including stack trace or detailed cause.
     Event:
       type: object
       description: A chaos experiment event recording a state transition or fault injection activity.
@@ -329,6 +313,22 @@ components:
         message:
           type: string
           description: Human-readable message describing the event.
+    APIError:
+      type: object
+      description: Error response returned when an API request fails.
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          description: HTTP status code of the error.
+        message:
+          type: string
+          description: Human-readable description of the error.
+        full_text:
+          type: string
+          description: Full error text including stack trace or detailed cause.
     ErrorResponse:
       type: object
       description: Error response returned when an API operation fails.
