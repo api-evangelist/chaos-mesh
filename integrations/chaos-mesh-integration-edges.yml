@@ -5,28 +5,10 @@ checked:
 - https://focus.finops.org/data-generators/
 - https://github.com/cncf/k8s-conformance
 - https://github.com/cncf/landscape
+- artifact-hub/integrations/artifact-hub-integration-edges.yml
 source:
 - grafana-com/integrations/grafana-com-integration-edges.yml
 edges:
-- partner_name: Grafana (own)
-  partner: grafana-com
-  partner_match: mirror
-  mirror_match: domain
-  type: marketplace
-  relationship: platform-app
-  direction: third-party
-  channel: partner-built
-  marketplace: own
-  evidence: https://grafana.com/grafana/plugins/chaosmeshorg-datasource/
-  mirror_of: grafana-com/integrations/grafana-com-integration-edges.yml
-  apps:
-  - Chaos Mesh
-  listing_count: 1
-  detected: '2026-10-14'
-  detected_by: mirror-platform-listings.py
-  category: Data Source
-  badges:
-  - signature:community
 - partner_name: CNCF (Cloud Native Landscape)
   partner: cncf
   partner_match: register
@@ -62,3 +44,41 @@ edges:
     detected: '2026-10-19'
   detected_by: sweep-cloud-native.py
   first_seen: '2026-10-15'
+- partner_name: Grafana (own)
+  partner: grafana-com
+  partner_match: mirror
+  mirror_match: domain
+  type: marketplace
+  relationship: platform-app
+  direction: third-party
+  channel: partner-built
+  marketplace: own
+  evidence: https://grafana.com/grafana/plugins/chaosmeshorg-datasource/
+  mirror_of: grafana-com/integrations/grafana-com-integration-edges.yml
+  apps:
+  - Chaos Mesh
+  listing_count: 1
+  detected: '2026-10-14'
+  detected_by: mirror-platform-listings.py
+  category: Data Source
+  badges:
+  - signature:community
+- partner_name: Artifact Hub (artifact-hub)
+  partner: artifact-hub
+  partner_match: mirror
+  mirror_match: domain
+  type: marketplace
+  relationship: platform-app
+  direction: third-party
+  channel: partner-built
+  marketplace: artifact-hub
+  evidence: https://artifacthub.io/packages/search?repo=chaos-mesh
+  mirror_of: artifact-hub/integrations/artifact-hub-integration-edges.yml
+  apps:
+  - chaos-mesh
+  listing_count: 1
+  detected: '2026-10-22'
+  detected_by: mirror-platform-listings.py
+  category: Artifact Hub listing (Helm chart)
+  badges:
+  - 'Verified publisher (Artifact Hub verified publisher: repository ownership proven)'
