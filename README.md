@@ -1,4 +1,4 @@
-# Chaos Mesh (chaos-mesh)
+# Chaos Mesh
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,83 +66,150 @@
 
 Chaos Mesh is a CNCF graduated cloud-native chaos engineering platform that orchestrates chaos experiments on Kubernetes to test system resilience and reliability. It exposes Kubernetes Custom Resource Definitions (CRDs) for a wide range of chaos kinds (network, pod, IO, stress, DNS, time, kernel, JVM, HTTP), along with a Chaos Dashboard web UI backed by a REST API for creating, managing, and monitoring chaos experiments and workflows. Chaos Mesh integrates with Kubernetes, Argo Workflows, Prometheus, Grafana, and CI/CD pipelines to run experiments safely in staging and production environments.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/chaos-mesh/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/chaos-mesh/refs/heads/main/apis.yml)
+**Areas:** Chaos Engineering · Cloud-Native · CNCF · Kubernetes · Observability · Open Source · Reliability · Resilience · Testing
 
-## Scope
+## Chaos Mesh on APIs.io
 
-- **Type:** Index
-- **Position:** Consumer
-- **Access:** Open Source
+Everything profiled for Chaos Mesh is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/chaos-mesh/](https://apis.io/providers/chaos-mesh/)** — or go straight to one of the APIs or properties below.
 
-## Tags
+### APIs (7)
 
-- Chaos Engineering
-- Cloud Native
-- CNCF
-- Fault Injection
-- Kubernetes
-- Observability
-- Open Source
-- Reliability
-- Resilience
-- Testing
+- [Chaos Mesh Archives API](https://apis.io/apis/chaos-mesh/chaos-mesh-archives-api/) — Access archived (completed or deleted) experiments, schedules, and workflows
+- [Chaos Mesh Common API](https://apis.io/apis/chaos-mesh/chaos-mesh-common-api/) — Utility endpoints for cluster metadata, namespaces, and configuration
+- [Chaos Mesh Events API](https://apis.io/apis/chaos-mesh/chaos-mesh-events-api/) — Query chaos experiment events and audit logs
+- [Chaos Mesh Experiments API](https://apis.io/apis/chaos-mesh/chaos-mesh-experiments-api/) — Create, manage, pause, and delete chaos experiments
+- [Chaos Mesh Schedules API](https://apis.io/apis/chaos-mesh/chaos-mesh-schedules-api/) — Create and manage scheduled chaos experiments
+- [Chaos Mesh Templates API](https://apis.io/apis/chaos-mesh/chaos-mesh-templates-api/) — Manage reusable status check templates for workflows
+- [Chaos Mesh Workflows API](https://apis.io/apis/chaos-mesh/chaos-mesh-workflows-api/) — Create and manage chaos engineering workflows with multiple steps
 
-## Timestamps
+### Published properties
 
-- **Created:** 2025-01-01
-- **Modified:** 2026-05-19
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## APIs
+#### Agentic access (1)
 
-### Chaos Mesh API
+Which operations an agent can call, which act, and which need a human in the loop.
 
-Chaos Mesh provides Kubernetes Custom Resources and a REST API for orchestrating chaos experiments including network faults, pod failures, IO chaos, stress testing, kernel chaos, DNS chaos, time chaos, JVM chaos, and HTTP request injection. The Chaos Dashboard exposes a REST API for creating, running, scheduling, and observing experiments and multi-step workflows, with RBAC and event auditing.
+- [Chaos Mesh Agentic Access](https://apis.io/agentic-access/chaos-mesh/chaos-mesh-agentic-access/)
 
-- **Human URL:** [https://chaos-mesh.org/docs/](https://chaos-mesh.org/docs/)
+#### JSON Schema (1)
 
-#### Tags
+The data models the API reads and writes.
 
-- Chaos Engineering
-- CRDs
-- Dashboard
-- Experiments
-- Fault Injection
-- Kubernetes
-- Workflows
+- [Chaos Mesh Experiment](https://apis.io/schemas/chaos-mesh/chaos-mesh-experiment/)
 
-#### Properties
+#### JSON-LD (1)
 
-- [Documentation](https://chaos-mesh.org/docs/)
-- [Getting Started](https://chaos-mesh.org/docs/quick-start/)
-- [GitHub Repository](https://github.com/chaos-mesh/chaos-mesh)
-- [OpenAPI](openapi/chaos-mesh-dashboard-api-openapi.yml) — [OpenAPI Specification](https://spec.openapis.org/oas/latest.html)
-- [Postman Collection](collections/chaos-mesh-dashboard-api.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/chaos-mesh-dashboard-api.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
-- [JSON Schema](json-schema/chaos-mesh-experiment-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [JSON-LD](json-ld/chaos-mesh-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
+Linked-data contexts for the provider's vocabulary.
 
-## Common Properties
+- [Chaos Mesh Context](https://apis.io/jsonld/chaos-mesh/chaos-mesh-context/)
+
+#### Collections (9)
+
+Postman and Open Collection request collections.
+
+- [Chaos Mesh Dashboard Archives API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-archives-api/)
+- [Chaos Mesh Dashboard Archives Common API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-common-api/)
+- [Chaos Mesh Dashboard API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-dashboard/)
+- [Chaos Mesh Dashboard API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-dashboard-api/)
+- [Chaos Mesh Dashboard Archives Events API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-events-api/)
+- [Chaos Mesh Dashboard Archives Experiments API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-experiments-api/)
+- [Chaos Mesh Dashboard Archives Schedules API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-schedules-api/)
+- [Chaos Mesh Dashboard Archives Templates API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-templates-api/)
+- [Chaos Mesh Dashboard Archives Workflows API](https://apis.io/collections/chaos-mesh/open-chaos-mesh-workflows-api/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Chaos Mesh — jsonschema rules](https://apis.io/rules/chaos-mesh/chaos-mesh-jsonschema-spectral-rules/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Chaos Mesh Authentication](https://apis.io/security/chaos-mesh/chaos-mesh-authentication/)
+- [Chaos Mesh Domain Security](https://apis.io/security/chaos-mesh/chaos-mesh-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Chaos Mesh Plans Pricing](https://apis.io/plans/chaos-mesh/chaos-mesh-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Chaos Mesh Rate Limits](https://apis.io/rate-limits/chaos-mesh/chaos-mesh-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Chaos Mesh Finops](https://apis.io/finops/chaos-mesh/chaos-mesh-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://chaos-mesh.org/)
 - [Documentation](https://chaos-mesh.org/docs/)
-- [Getting Started](https://chaos-mesh.org/docs/quick-start/)
-- [Blog](https://chaos-mesh.org/blog/)
+- [Getting started](https://chaos-mesh.org/docs/quick-start/)
 - [Changelog](https://github.com/chaos-mesh/chaos-mesh/blob/master/CHANGELOG.md)
-- [Git Hub](https://github.com/chaos-mesh)
-- [GitHub Repository](https://github.com/chaos-mesh/chaos-mesh)
-- [Community](https://chaos-mesh.org/community/)
-- [License](https://github.com/chaos-mesh/chaos-mesh/blob/master/LICENSE)
-- [C N C F](https://www.cncf.io/projects/chaos-mesh/)
-- [Slack](https://slack.cncf.io/)
-- [X (Twitter)](https://x.com/chaos_mesh)
-- [JSON-LD](json-ld/chaos-mesh-context.jsonld) — [JSON-LD](https://www.w3.org/TR/json-ld11/)
-- [JSON Schema](json-schema/chaos-mesh-experiment-schema.json) — [JSON Schema](https://json-schema.org/specification)
-- [Features](undefined)
-- [Use Cases](undefined)
-- [Integrations](undefined)
-- [Chaos Kinds](undefined)
+- [Blog](https://chaos-mesh.org/blog/)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 42.2** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 57.1 |
+| Contract quality | 60.2 |
+| Contract governance | 9.8 |
+| Operational transparency | 39.5 |
+| Developer ergonomics | 38.1 |
+| Access clarity | 7.9 |
+
+**Agent readiness 16.9** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | — |
+| Operation Distinctiveness | — |
+
+**Regulatory alignment 16.7** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/chaos-mesh/](https://apis.io/providers/chaos-mesh/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Chaos Mesh: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/chaos-mesh/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
